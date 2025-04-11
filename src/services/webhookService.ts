@@ -9,7 +9,7 @@ export interface WebhookConfig {
 }
 
 // Use Chrome storage if available, otherwise use localStorage as fallback
-const storage = chrome?.storage?.sync || {
+const storage = chrome?.storage?.local || {
   get: async (key: string) => {
     const value = localStorage.getItem(key);
     return { [key]: value ? JSON.parse(value) : null };
@@ -24,8 +24,11 @@ const storage = chrome?.storage?.sync || {
 export const webhookService = {
   getAll: async (): Promise<WebhookConfig[]> => {
     try {
-      const result = await storage.get('webhooks');
-      return result.webhooks || [];
+      return new Promise((resolve) => {
+        storage.get('webhooks', (result) => {
+          resolve(result.webhooks || []);
+        });
+      });
     } catch (error) {
       console.error('Error fetching webhooks:', error);
       return [];
@@ -43,8 +46,11 @@ export const webhookService = {
         updatedAt: new Date().toISOString(),
       };
       
-      await storage.set({ 'webhooks': [...webhooks, newWebhook] });
-      return newWebhook;
+      return new Promise((resolve) => {
+        storage.set({ 'webhooks': [...webhooks, newWebhook] }, () => {
+          resolve(newWebhook);
+        });
+      });
     } catch (error) {
       console.error('Error adding webhook:', error);
       throw new Error('Failed to add webhook');
@@ -67,9 +73,12 @@ export const webhookService = {
       };
       
       webhooks[index] = updatedWebhook;
-      await storage.set({ 'webhooks': webhooks });
       
-      return updatedWebhook;
+      return new Promise((resolve) => {
+        storage.set({ 'webhooks': webhooks }, () => {
+          resolve(updatedWebhook);
+        });
+      });
     } catch (error) {
       console.error('Error updating webhook:', error);
       throw new Error('Failed to update webhook');
@@ -85,7 +94,11 @@ export const webhookService = {
         throw new Error('Webhook not found');
       }
       
-      await storage.set({ 'webhooks': filteredWebhooks });
+      return new Promise((resolve) => {
+        storage.set({ 'webhooks': filteredWebhooks }, () => {
+          resolve();
+        });
+      });
     } catch (error) {
       console.error('Error deleting webhook:', error);
       throw new Error('Failed to delete webhook');
