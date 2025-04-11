@@ -9,15 +9,22 @@ export interface WebhookConfig {
 }
 
 // Use Chrome storage if available, otherwise use localStorage as fallback
-const storage = chrome?.storage?.local || {
-  get: async (key: string) => {
-    const value = localStorage.getItem(key);
-    return { [key]: value ? JSON.parse(value) : null };
+const storage = typeof chrome !== 'undefined' && chrome?.storage?.local ? {
+  get: (key: string | string[] | object | null, callback: (items: { [key: string]: any }) => void) => {
+    chrome.storage.local.get(key, callback);
   },
-  set: async (data: Record<string, any>) => {
-    const key = Object.keys(data)[0];
-    localStorage.setItem(key, JSON.stringify(data[key]));
-    return true;
+  set: (items: object, callback?: () => void) => {
+    chrome.storage.local.set(items, callback);
+  }
+} : {
+  get: (key: string | string[] | object | null, callback: (items: { [key: string]: any }) => void) => {
+    const value = localStorage.getItem(typeof key === 'string' ? key : Object.keys(key || {})[0] || '');
+    callback({ [typeof key === 'string' ? key : Object.keys(key || {})[0] || '']: value ? JSON.parse(value) : null });
+  },
+  set: (items: object, callback?: () => void) => {
+    const key = Object.keys(items)[0];
+    localStorage.setItem(key, JSON.stringify(items[key as keyof typeof items]));
+    if (callback) callback();
   },
 };
 
