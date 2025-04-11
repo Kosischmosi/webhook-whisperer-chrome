@@ -1,73 +1,49 @@
-# Welcome to your Lovable project
 
-## Project info
+# Webhook Whisperer - Chrome Extension
 
-**URL**: https://lovable.dev/projects/a1fa50ee-73b9-427c-8632-cc17696e7119
+## Overview
+Webhook Whisperer is a Chrome extension that helps you manage webhook URLs and secrets for multiple integrators. Keep all your webhook configurations in one secure place with easy access and management.
 
-## How can I edit this code?
+## Features
+- Add, edit, and delete webhook configurations
+- Store webhook URLs and secrets securely 
+- Copy webhook details to clipboard with a single click
+- Search through your webhook configurations
+- Works both as a Chrome extension and as a standalone web application
 
-There are several ways of editing your application.
+## Installation
 
-**Use Lovable**
+### Local Development
+1. Clone this repository
+2. Run `npm install` to install dependencies
+3. Run `npm run dev` to start the development server
+4. Open your browser at http://localhost:8080
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/a1fa50ee-73b9-427c-8632-cc17696e7119) and start prompting.
+### Load as Chrome Extension
+1. Build the project: `npm run build`
+2. Open Chrome and navigate to `chrome://extensions/`
+3. Enable "Developer mode" at the top right
+4. Click "Load unpacked" and select the `dist` folder from this project
+5. The extension will appear in your Chrome toolbar
 
-Changes made via Lovable will be committed automatically to this repo.
+## Usage
+1. Click on the Webhook Whisperer icon in your Chrome toolbar
+2. Use the "Add New Webhook" button to create a new webhook configuration
+3. Fill in the webhook name, URL, and optional secret
+4. Your webhooks will be securely stored in Chrome's storage
 
-**Use your preferred IDE**
+## Security
+Your webhook data is stored locally in your browser using Chrome's storage API, which means:
+- Data never leaves your browser
+- No external servers are involved
+- Your secrets remain private
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
+## Technologies Used
 - React
-- shadcn-ui
+- TypeScript
 - Tailwind CSS
+- shadcn/ui components
+- Chrome Storage API
 
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/a1fa50ee-73b9-427c-8632-cc17696e7119) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes it is!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+## License
+MIT
