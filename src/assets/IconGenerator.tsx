@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 
 // Function to generate a simple SVG icon with a W shape
-const generateIconSVG = (size: number, color: string): string => {
+const generateIconSVG = (size: number, color: string = '#00c2e8'): string => {
   const strokeWidth = size / 24;
   
   return `
@@ -23,7 +23,7 @@ const generateIconSVG = (size: number, color: string): string => {
 // Function to create and download the icon files
 export const generateAndDownloadIcons = () => {
   const sizes = [16, 48, 128];
-  const color = '#6930c3'; // Purple color matching our theme
+  const color = '#00c2e8'; // Updated to the new color
   
   sizes.forEach(size => {
     const svg = generateIconSVG(size, color);
@@ -45,7 +45,7 @@ interface IconProps {
   color?: string;
 }
 
-export const WebhookWhispererIcon = ({ size, color = '#6930c3' }: IconProps) => {
+export const WebhookWhispererIcon = ({ size, color = '#00c2e8' }: IconProps) => {
   const [svgContent, setSvgContent] = useState('');
   
   useEffect(() => {

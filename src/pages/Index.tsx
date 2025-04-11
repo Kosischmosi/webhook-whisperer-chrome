@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { WebhookConfig, webhookService } from "@/services/webhookService";
@@ -10,7 +9,7 @@ import WebhookCard from "@/components/WebhookCard";
 import EmptyState from "@/components/EmptyState";
 import { useToast } from "@/hooks/use-toast";
 import { WebhookWhispererIcon } from "@/assets/IconGenerator";
-import { Loader2, Plus, Search, Settings } from "lucide-react";
+import { Loader2, Plus, Search } from "lucide-react";
 
 const Index = () => {
   const { toast } = useToast();
@@ -103,7 +102,7 @@ const Index = () => {
     }
   };
 
-  const isExtension = !!chrome?.runtime?.id;
+  const isExtension = typeof chrome !== 'undefined' && !!chrome?.runtime?.id;
 
   return (
     <div className="min-h-screen bg-background">
