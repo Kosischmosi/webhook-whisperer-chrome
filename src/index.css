@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 191 100% 45%;
+    --primary: 231 78% 35%; /* Original war 191 100% 45%, wird hier mit 1E40AF hsl approx überschrieben */
     --primary-foreground: 210 40% 98%;
 
     --secondary: 190 100% 94%;
@@ -30,18 +31,18 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 191 100% 45%;
+    --ring: 231 78% 35%; /* ebenfalls das neue Blau */
 
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 191 100% 45%;
+    --sidebar-primary: 231 78% 35%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 190 100% 94%;
     --sidebar-accent-foreground: 191 100% 35%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 191 100% 45%;
+    --sidebar-ring: 231 78% 35%;
   }
 
   .dark {
@@ -54,7 +55,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 191 100% 55%;
+    --primary: 231 78% 35%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 190 100% 20%;
@@ -63,7 +64,7 @@
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 191 100% 20%;
+    --accent: 231 78% 35%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
@@ -71,16 +72,16 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 191 100% 55%;
+    --ring: 231 78% 35%;
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 191 100% 55%;
+    --sidebar-primary: 231 78% 35%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 190 100% 20%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 191 100% 55%;
+    --sidebar-ring: 231 78% 35%;
   }
 }
 
@@ -129,3 +130,4 @@
     animation: fade-out 0.3s ease-out;
   }
 }
+

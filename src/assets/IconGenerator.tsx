@@ -1,8 +1,8 @@
 
 import { useEffect, useState } from 'react';
 
-// Function to generate a simple SVG icon with a W shape
-const generateIconSVG = (size: number, color: string = '#00c2e8'): string => {
+// Funktion zum Erzeugen eines einfachen SVG-Icons mit einem "W" in der Farbe #1E40AF
+const generateIconSVG = (size: number, color: string = '#1E40AF'): string => {
   const strokeWidth = size / 24;
   
   return `
@@ -20,10 +20,10 @@ const generateIconSVG = (size: number, color: string = '#00c2e8'): string => {
   `;
 };
 
-// Function to create and download the icon files
+// Funktion zum erneuten Erzeugen und Download der Icons, falls benötigt
 export const generateAndDownloadIcons = () => {
   const sizes = [16, 48, 128];
-  const color = '#00c2e8'; // Updated to the new color
+  const color = '#1E40AF'; // neues Blau
   
   sizes.forEach(size => {
     const svg = generateIconSVG(size, color);
@@ -39,13 +39,13 @@ export const generateAndDownloadIcons = () => {
   });
 };
 
-// Component to display the SVG icon in the app
+// Component für das SVG-Icon im App-Header
 interface IconProps {
   size: number;
   color?: string;
 }
 
-export const WebhookWhispererIcon = ({ size, color = '#00c2e8' }: IconProps) => {
+export const WebhookWhispererIcon = ({ size, color = '#1E40AF' }: IconProps) => {
   const [svgContent, setSvgContent] = useState('');
   
   useEffect(() => {
@@ -56,3 +56,4 @@ export const WebhookWhispererIcon = ({ size, color = '#00c2e8' }: IconProps) => 
     <div dangerouslySetInnerHTML={{ __html: svgContent }} />
   );
 };
+
