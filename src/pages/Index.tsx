@@ -102,6 +102,7 @@ const Index = () => {
     }
   };
 
+  // Korrekte Erkennung der Extension-Umgebung
   const isExtension = typeof chrome !== 'undefined' && !!chrome?.runtime?.id;
 
   return (

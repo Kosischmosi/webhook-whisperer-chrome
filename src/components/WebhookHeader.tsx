@@ -13,7 +13,7 @@ const WebhookHeader = ({ isExtension }: WebhookHeaderProps) => {
           <WebhookWhispererIcon size={36} />
           <h1 className="text-2xl font-semibold ml-3">Webhook Whisperer</h1>
         </div>
-        {!isExtension && (
+        {isExtension && (
           <div className="text-sm text-muted-foreground">
             Chrome Extension Mode
           </div>
