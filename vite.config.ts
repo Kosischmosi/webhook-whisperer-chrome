@@ -1,3 +1,4 @@
+
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -19,4 +20,14 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  // Stellen Sie sicher, dass die richtigen Assets kopiert werden für die Chrome-Extension
+  build: {
+    outDir: "dist",
+    assetsDir: "assets",
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, "index.html")
+      }
+    }
+  }
 }));
