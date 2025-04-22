@@ -1,10 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { WebhookConfig, webhookService } from "@/services/webhookService";
 import { useToast } from "@/hooks/use-toast";
-import { Plus } from "lucide-react"; // Add this import for the Plus icon
+import { Plus } from "lucide-react";
 
-// Import our newly created components
 import WebhookHeader from "@/components/WebhookHeader";
 import WebhookActionBar from "@/components/WebhookActionBar";
 import SearchBar from "@/components/SearchBar";
@@ -103,14 +101,13 @@ const Index = () => {
     }
   };
 
-  // Korrekte Erkennung der Extension-Umgebung
   const isExtension = typeof chrome !== 'undefined' && !!chrome?.runtime?.id;
 
   return (
     <div className="min-h-screen bg-background">
-      <WebhookHeader isExtension={isExtension} />
+      <WebhookHeader />
 
-      <main className="max-w-7xl mx-auto px-3 py-4">
+      <main className="max-w-7xl mx-auto px-3 py-2">
         <WebhookActionBar onAddNew={handleAddWebhook} />
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         
@@ -125,7 +122,6 @@ const Index = () => {
           setSearchQuery={setSearchQuery}
         />
 
-        {/* Floating Action Button */}
         <button
           onClick={handleAddWebhook}
           className="fixed bottom-4 right-4 p-2 bg-primary text-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95"

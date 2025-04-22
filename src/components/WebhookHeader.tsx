@@ -1,25 +1,16 @@
 
 import { WebhookWhispererIcon } from "@/assets/IconGenerator";
 
-interface WebhookHeaderProps {
-  isExtension: boolean;
-}
-
-const WebhookHeader = ({ isExtension }: WebhookHeaderProps) => {
+const WebhookHeader = () => {
   return (
-    <header className="border-b py-4 px-6">
+    <header className="border-b py-2 px-4">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center group">
           <div className="transform transition-transform duration-200 group-hover:scale-110">
-            <WebhookWhispererIcon size={36} />
+            <WebhookWhispererIcon size={24} />
           </div>
-          <h1 className="text-2xl font-semibold ml-3">Webhook Whisperer</h1>
+          <h1 className="text-lg font-semibold ml-2">Webhook Whisperer</h1>
         </div>
-        {isExtension && (
-          <div className="text-sm text-muted-foreground">
-            Chrome Extension Mode
-          </div>
-        )}
       </div>
     </header>
   );
