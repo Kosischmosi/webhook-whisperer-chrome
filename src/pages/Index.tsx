@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { WebhookConfig, webhookService } from "@/services/webhookService";
 import { useToast } from "@/hooks/use-toast";
@@ -107,7 +108,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <WebhookHeader />
 
-      <main className="max-w-7xl mx-auto px-3 py-2">
+      <main className="w-[480px] mx-auto px-3 py-2">
         <WebhookActionBar onAddNew={handleAddWebhook} />
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         
