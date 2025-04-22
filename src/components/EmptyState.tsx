@@ -11,7 +11,7 @@ const EmptyState = ({ onAddNew }: EmptyStateProps) => {
       <div className="bg-primary/10 p-3 rounded-full mb-4 animate-fade-in">
         <MessageSquare className="h-8 w-8 text-primary" />
       </div>
-      <h3 className="text-lg font-medium mb-2">Looks a little empty here 👀</h3>
+      <h3 className="text-lg font-medium mb-2">Looks empty here 👀</h3>
       <p className="text-sm text-muted-foreground text-center mb-2 max-w-[200px]">
         Add your first webhook configuration.
       </p>
