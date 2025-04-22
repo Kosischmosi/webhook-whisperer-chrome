@@ -110,7 +110,7 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <WebhookHeader isExtension={isExtension} />
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <main className="max-w-7xl mx-auto px-3 py-4">
         <WebhookActionBar onAddNew={handleAddWebhook} />
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         
@@ -128,9 +128,9 @@ const Index = () => {
         {/* Floating Action Button */}
         <button
           onClick={handleAddWebhook}
-          className="fixed bottom-6 right-6 p-4 bg-primary text-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95"
+          className="fixed bottom-4 right-4 p-2 bg-primary text-white rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95"
         >
-          <Plus size={24} />
+          <Plus size={20} />
         </button>
 
         <WebhookDialogForm

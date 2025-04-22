@@ -12,10 +12,8 @@ const SearchBar = ({ searchQuery, setSearchQuery }: SearchBarProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Auto-focus beim Öffnen
     inputRef.current?.focus();
 
-    // Escape zum Leeren
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && searchQuery) {
         setSearchQuery('');
@@ -27,21 +25,21 @@ const SearchBar = ({ searchQuery, setSearchQuery }: SearchBarProps) => {
   }, [searchQuery, setSearchQuery]);
 
   return (
-    <div className="relative mb-10">
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
+    <div className="relative mb-4">
+      <Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={16} />
       <Input
         ref={inputRef}
-        className="pl-10 pr-10 transition-all focus:shadow-md"
-        placeholder="Search webhooks by name or URL..."
+        className="pl-8 pr-8 h-8 text-sm"
+        placeholder="Search webhooks..."
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
       />
       {searchQuery && (
         <button
           onClick={() => setSearchQuery('')}
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+          className="absolute right-2 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
         >
-          <X size={16} />
+          <X size={14} />
         </button>
       )}
     </div>
