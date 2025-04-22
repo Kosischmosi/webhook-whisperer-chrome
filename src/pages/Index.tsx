@@ -105,10 +105,10 @@ const Index = () => {
   const isExtension = typeof chrome !== 'undefined' && !!chrome?.runtime?.id;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-[600px] w-[480px] bg-background">
       <WebhookHeader />
 
-      <main className="w-[480px] mx-auto px-3 py-2">
+      <main className="w-full px-3 py-2">
         <WebhookActionBar onAddNew={handleAddWebhook} />
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         
