@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { WebhookConfig, webhookService } from "@/services/webhookService";
 import { useToast } from "@/hooks/use-toast";
+import { Plus } from "lucide-react"; // Add this import for the Plus icon
 
 // Import our newly created components
 import WebhookHeader from "@/components/WebhookHeader";
