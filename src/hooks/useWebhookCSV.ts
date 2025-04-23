@@ -43,6 +43,11 @@ export const useWebhookCSV = (
 
   const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log("Import CSV triggered");
+    
+    // Immediately prevent default behavior
+    e.preventDefault();
+    e.stopPropagation();
+    
     const file = e.target.files?.[0];
     if (!file) {
       console.log("No file selected");
@@ -51,81 +56,109 @@ export const useWebhookCSV = (
     
     console.log("File selected:", file.name, file.type, file.size);
     
-    // Prevent default behavior that might close the popup
-    e.preventDefault();
-    e.stopPropagation();
-    
-    // Create a new FileReader
-    const reader = new FileReader();
-    
-    reader.onload = async (event) => {
-      try {
-        console.log("FileReader loaded");
-        const text = event.target?.result as string;
-        if (!text) {
-          console.error("No text content in file");
-          throw new Error("Datei konnte nicht gelesen werden");
-        }
-        
-        console.log("CSV content length:", text.length);
-        const imported = csvToWebhooks(text);
-        console.log("Parsed webhooks:", imported);
-        
-        if (!imported.length) {
-          console.error("No webhooks found in CSV");
-          throw new Error("Keine Webhooks gefunden");
-        }
-        
-        let importedCount = 0;
-        // Verwende Promise.all für parallele Verarbeitung, aber mit einem kleinen Delay
-        // um das UI nicht zu blockieren und das Popup offen zu halten
-        await Promise.all(imported.map(async (w, index) => {
-          const exists = webhooks.some(existing => existing.name === w.name && existing.url === w.url);
-          if (!exists) {
-            console.log("Adding webhook:", w.name);
-            // Delay hinzufügen, um das UI nicht zu blockieren
-            await new Promise(resolve => setTimeout(resolve, index * 50));
-            await webhookService.add(w);
-            importedCount++;
-          } else {
-            console.log("Webhook already exists:", w.name);
-          }
-        }));
-        
-        toast({ 
-          title: "Import erfolgreich", 
-          description: `${importedCount} Webhooks importiert.` 
-        });
-        
-        // Verwende setTimeout, um sicherzustellen, dass das Popup nicht geschlossen wird
-        setTimeout(() => {
-          reloadWebhooks();
-        }, 100);
-      } catch (err) {
-        console.error("CSV Import error:", err);
+    try {
+      // Use Promise-based file reading approach
+      const text = await readFileAsText(file);
+      console.log("CSV content length:", text.length);
+      
+      if (!text || text.trim() === '') {
+        console.error("Empty file content");
         toast({
           title: "Import fehlgeschlagen",
-          description: "Die Datei konnte nicht gelesen oder das Format war ungültig.",
+          description: "Die Datei enthält keine Daten.",
           variant: "destructive"
         });
+        return;
       }
-    };
-    
-    reader.onerror = (error) => {
-      console.error("FileReader error:", error);
+      
+      const imported = csvToWebhooks(text);
+      console.log("Parsed webhooks:", imported);
+      
+      if (!imported || !imported.length) {
+        console.error("No webhooks found in CSV");
+        toast({
+          title: "Import fehlgeschlagen",
+          description: "Es wurden keine gültigen Webhook-Daten in der CSV gefunden.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      let importedCount = 0;
+      
+      // Process webhooks sequentially to maintain popup stability
+      for (let i = 0; i < imported.length; i++) {
+        const w = imported[i];
+        const exists = webhooks.some(existing => existing.name === w.name && existing.url === w.url);
+        
+        if (!exists) {
+          console.log(`Adding webhook (${i+1}/${imported.length}):`, w.name);
+          try {
+            await webhookService.add(w);
+            importedCount++;
+          } catch (error) {
+            console.error(`Error adding webhook ${w.name}:`, error);
+          }
+          
+          // Small delay between operations
+          if (i < imported.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 50));
+          }
+        } else {
+          console.log(`Webhook already exists (${i+1}/${imported.length}):`, w.name);
+        }
+      }
+      
+      // Show success message
+      toast({ 
+        title: "Import erfolgreich", 
+        description: `${importedCount} Webhooks importiert.` 
+      });
+      
+      // Reload after a small delay
+      setTimeout(() => {
+        reloadWebhooks();
+      }, 300);
+    } catch (error) {
+      console.error("CSV Import error:", error);
       toast({
         title: "Import fehlgeschlagen",
-        description: "Die Datei konnte nicht gelesen werden.",
+        description: typeof error === 'string' ? error : "Die CSV-Datei konnte nicht verarbeitet werden.",
         variant: "destructive"
       });
-    };
-    
-    // Read the file as text
-    console.log("Starting to read file...");
-    reader.readAsText(file);
-    
-    // Reset the file input
-    if (fileInputRef.current) fileInputRef.current.value = "";
+    } finally {
+      // Reset the file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+  
+  // Helper function to read file content as text
+  const readFileAsText = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (event) => {
+        try {
+          const text = event.target?.result as string;
+          if (!text) {
+            reject("Datei konnte nicht gelesen werden");
+          } else {
+            resolve(text);
+          }
+        } catch (err) {
+          reject("Fehler beim Lesen der Datei");
+        }
+      };
+      
+      reader.onerror = () => {
+        reject("Fehler beim Zugriff auf die Datei");
+      };
+      
+      // Read the file as text
+      reader.readAsText(file);
+    });
   };
 
   return {
