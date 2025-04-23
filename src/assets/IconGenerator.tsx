@@ -1,8 +1,8 @@
 
 import { useEffect, useState } from 'react';
 
-// Funktion zum Erzeugen eines einfachen SVG-Icons mit einem "W" in der Farbe #1E40AF
-const generateIconSVG = (size: number, color: string = '#1E40AF'): string => {
+// Updated color to match the new logo's blue
+const generateIconSVG = (size: number, color: string = '#0D47A1'): string => {
   const strokeWidth = size / 24;
   
   return `
