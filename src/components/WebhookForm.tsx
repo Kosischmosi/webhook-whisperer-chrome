@@ -74,19 +74,21 @@ const WebhookForm = ({ webhook, onSave, onCancel }: WebhookFormProps) => {
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>{webhook ? "Edit Webhook" : "Add New Webhook"}</CardTitle>
-        <CardDescription>
+    <Card className="w-full shadow-none border-none bg-transparent">
+      <CardHeader className="p-0 mb-1">
+        <CardTitle className="text-base font-semibold leading-tight">
+          {webhook ? "Edit Webhook" : "Add New Webhook"}
+        </CardTitle>
+        <CardDescription className="text-xs text-muted-foreground">
           {webhook 
             ? "Update your webhook configuration" 
             : "Enter the details for your new webhook configuration"}
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+        <CardContent className="p-0 space-y-3">
+          <div className="space-y-1">
+            <Label htmlFor="name" className="text-sm leading-tight">Name</Label>
             <Input
               id="name"
               name="name"
@@ -94,11 +96,12 @@ const WebhookForm = ({ webhook, onSave, onCancel }: WebhookFormProps) => {
               value={formData.name}
               onChange={handleChange}
               required
+              className="h-8 text-sm px-2"
             />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="url">Webhook URL</Label>
+          <div className="space-y-1">
+            <Label htmlFor="url" className="text-sm leading-tight">Webhook URL</Label>
             <Input
               id="url"
               name="url"
@@ -106,11 +109,12 @@ const WebhookForm = ({ webhook, onSave, onCancel }: WebhookFormProps) => {
               value={formData.url}
               onChange={handleChange}
               required
+              className="h-8 text-sm px-2"
             />
           </div>
           
-          <div className="space-y-2">
-            <Label htmlFor="secret">Secret Key (optional)</Label>
+          <div className="space-y-1">
+            <Label htmlFor="secret" className="text-sm leading-tight">Secret Key (optional)</Label>
             <div className="relative">
               <Input
                 id="secret"
@@ -119,25 +123,27 @@ const WebhookForm = ({ webhook, onSave, onCancel }: WebhookFormProps) => {
                 placeholder="Your webhook secret"
                 value={formData.secret}
                 onChange={handleChange}
+                className="h-8 text-sm pr-9 px-2"
               />
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="absolute right-2 top-1/2 -translate-y-1/2"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
                 onClick={() => setShowSecret(!showSecret)}
+                tabIndex={-1}
               >
-                {showSecret ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showSecret ? <EyeOff size={16} /> : <Eye size={16} />}
               </Button>
             </div>
           </div>
         </CardContent>
         
-        <CardFooter className="flex justify-between">
-          <Button type="button" variant="outline" onClick={onCancel}>
+        <CardFooter className="flex justify-between space-x-2 p-0 pt-4">
+          <Button type="button" variant="outline" size="sm" onClick={onCancel} className="h-8 px-3 text-sm">
             Cancel
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} size="sm" className="h-8 px-4 text-sm">
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {webhook ? "Update Webhook" : "Add Webhook"}
           </Button>
