@@ -1,8 +1,12 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  /* Verhindert das Springen beim Ein-/Ausblenden des Scrollbalkens */
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
 }
 
 .logo {
@@ -39,4 +43,10 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Zusätzliche Scrollbar-Fix-Klasse */
+.scrollbar-fix {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
 }

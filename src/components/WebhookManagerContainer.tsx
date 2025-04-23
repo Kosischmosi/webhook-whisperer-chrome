@@ -120,7 +120,7 @@ const WebhookManagerContainer = () => {
   }, [startImport]);
 
   return (
-    <div className="min-h-[600px] w-[480px] bg-background">
+    <div className="min-h-[600px] w-[480px] bg-background scrollbar-fix">
       <WebhookHeader
         onExportCSV={handleExportCSV}
         onImportCSVClick={handleShowDropZone}
