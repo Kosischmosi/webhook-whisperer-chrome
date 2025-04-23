@@ -1,7 +1,5 @@
-
 import { useEffect, useState } from 'react';
 
-// Updated color to match the new logo's blue
 const generateIconSVG = (size: number, color: string = '#0D47A1'): string => {
   const strokeWidth = size / 24;
   
@@ -20,10 +18,33 @@ const generateIconSVG = (size: number, color: string = '#0D47A1'): string => {
   `;
 };
 
-// Funktion zum erneuten Erzeugen und Download der Icons, falls benötigt
+interface IconProps {
+  size: number;
+  color?: string;
+  imageSrc?: string;
+}
+
+export const WebhookWhispererIcon = ({ size, color = '#0D47A1', imageSrc }: IconProps) => {
+  const [svgContent, setSvgContent] = useState('');
+  
+  useEffect(() => {
+    if (imageSrc) {
+      setSvgContent(`
+        <img src="${imageSrc}" width="${size}" height="${size}" alt="Webhook Whisperer Icon" />
+      `);
+    } else {
+      setSvgContent(generateIconSVG(size, color));
+    }
+  }, [size, color, imageSrc]);
+  
+  return (
+    <div dangerouslySetInnerHTML={{ __html: svgContent }} />
+  );
+};
+
 export const generateAndDownloadIcons = () => {
   const sizes = [16, 48, 128];
-  const color = '#1E40AF'; // neues Blau
+  const color = '#1E40AF';
   
   sizes.forEach(size => {
     const svg = generateIconSVG(size, color);
@@ -38,22 +59,3 @@ export const generateAndDownloadIcons = () => {
     URL.revokeObjectURL(url);
   });
 };
-
-// Component für das SVG-Icon im App-Header
-interface IconProps {
-  size: number;
-  color?: string;
-}
-
-export const WebhookWhispererIcon = ({ size, color = '#1E40AF' }: IconProps) => {
-  const [svgContent, setSvgContent] = useState('');
-  
-  useEffect(() => {
-    setSvgContent(generateIconSVG(size, color));
-  }, [size, color]);
-  
-  return (
-    <div dangerouslySetInnerHTML={{ __html: svgContent }} />
-  );
-};
-
