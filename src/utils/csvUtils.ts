@@ -32,13 +32,11 @@ export function csvToWebhooks(csvString: string): { name: string; url: string; s
       return [];
     }
     
-    const [header, ...dataRows] = rows;
-    console.log("Header row:", header);
-    console.log("Data rows count:", dataRows.length);
-    
-    if (!header || !dataRows.length) {
-      console.error("Missing header or data rows");
-      return [];
+    // Skip header row if present
+    let dataRows = rows;
+    if (rows[0].toLowerCase().includes('name') && rows[0].toLowerCase().includes('url')) {
+      dataRows = rows.slice(1);
+      console.log("Skipping header row, data rows count:", dataRows.length);
     }
     
     // Process each data row
@@ -47,33 +45,36 @@ export function csvToWebhooks(csvString: string): { name: string; url: string; s
       .map((row, index) => {
         console.log(`Processing row ${index + 1}:`, row.substring(0, 50) + (row.length > 50 ? "..." : ""));
         
-        // Try different parsing strategies
+        // Simplify CSV parsing logic - try most common formats
         
-        // 1. Standard CSV format with quotes
-        const standardMatch = row.match(/^"((?:[^"]|"")*)","((?:[^"]|"")*)","((?:[^"]|"")*)"$/);
-        if (standardMatch) {
-          console.log(`Row ${index + 1}: Standard CSV format match`);
-          return {
-            name: standardMatch[1].replace(/""/g, '"'),
-            url: standardMatch[2].replace(/""/g, '"'),
-            secret: standardMatch[3].replace(/""/g, '"')
-          };
+        // 1. Try simple comma split with quote handling
+        let parts: string[] = [];
+        
+        // Check if we have quotes - if so, use a more careful parsing approach
+        if (row.includes('"')) {
+          // Regex to match CSV fields that may contain quotes
+          const csvRegex = /"([^"]*(?:"[^"]*"[^"]*)*)"|([^,]*),/g;
+          parts = [];
+          let match;
+          let remainder = row + ','; // Add trailing comma to match last field
+          
+          while (match = csvRegex.exec(remainder)) {
+            parts.push((match[1] !== undefined ? match[1] : match[2]) || '');
+          }
+          
+          // Check if we got enough parts
+          if (parts.length < 3) {
+            console.log("Quote parsing didn't produce enough fields, falling back to simple split");
+            parts = row.split(',').map(p => p.replace(/^"|"$/g, ''));
+          }
+        } else {
+          // No quotes, simple split is fine
+          parts = row.split(',');
         }
         
-        // 2. Alternative format with flexible quotes
-        const altMatch = row.match(/(?:"([^"]*)"(?:,|$)|([^,]*),)(?:"([^"]*)"(?:,|$)|([^,]*),)(?:"([^"]*)"(?:,|$)|([^,]*),?)/);
-        if (altMatch) {
-          console.log(`Row ${index + 1}: Alternative format match`);
-          return {
-            name: (altMatch[1] || altMatch[2] || '').replace(/""/g, '"'),
-            url: (altMatch[3] || altMatch[4] || '').replace(/""/g, '"'),
-            secret: (altMatch[5] || altMatch[6] || '').replace(/""/g, '"')
-          };
-        }
+        // Make sure we have at least 3 parts
+        while (parts.length < 3) parts.push('');
         
-        // 3. Simple comma split fallback
-        console.log(`Row ${index + 1}: Using simple comma split fallback`);
-        const parts = row.split(',');
         return {
           name: parts[0]?.replace(/^"|"$/g, '').replace(/""/g, '"') || '',
           url: parts[1]?.replace(/^"|"$/g, '').replace(/""/g, '"') || '',

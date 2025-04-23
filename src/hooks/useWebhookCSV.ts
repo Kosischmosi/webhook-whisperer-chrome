@@ -41,100 +41,109 @@ export const useWebhookCSV = (
     });
   };
 
-  const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("Import CSV triggered");
+  // Ändern des Import-Mechanismus für Browser-Erweiterungen
+  const handleImportCSV = () => {
+    // Statt auf Change-Event zu warten, setzen wir einen Click-Event-Handler,
+    // der die Datei sofort verarbeitet, nachdem sie ausgewählt wurde
     
-    // Immediately prevent default behavior
-    e.preventDefault();
-    e.stopPropagation();
+    if (!fileInputRef.current) return;
     
-    const file = e.target.files?.[0];
-    if (!file) {
-      console.log("No file selected");
-      return;
+    // Entfernen des vorherigen Event-Listeners, falls vorhanden
+    const oldInput = fileInputRef.current;
+    const newInput = document.createElement('input');
+    newInput.type = 'file';
+    newInput.accept = '.csv';
+    newInput.style.display = 'none';
+    
+    // Ersetzen des Input-Elements
+    if (oldInput.parentNode) {
+      oldInput.parentNode.replaceChild(newInput, oldInput);
+      fileInputRef.current = newInput;
     }
     
-    console.log("File selected:", file.name, file.type, file.size);
-    
-    try {
-      // Use Promise-based file reading approach
-      const text = await readFileAsText(file);
-      console.log("CSV content length:", text.length);
+    // Event-Handler für Dateiauswahl
+    newInput.onchange = async (e) => {
+      const target = e.target as HTMLInputElement;
+      const file = target.files?.[0];
       
-      if (!text || text.trim() === '') {
-        console.error("Empty file content");
-        toast({
-          title: "Import fehlgeschlagen",
-          description: "Die Datei enthält keine Daten.",
-          variant: "destructive"
-        });
+      if (!file) {
+        console.log("Keine Datei ausgewählt");
         return;
       }
       
-      const imported = csvToWebhooks(text);
-      console.log("Parsed webhooks:", imported);
+      console.log("Datei ausgewählt:", file.name, file.type, file.size);
       
-      if (!imported || !imported.length) {
-        console.error("No webhooks found in CSV");
-        toast({
-          title: "Import fehlgeschlagen",
-          description: "Es wurden keine gültigen Webhook-Daten in der CSV gefunden.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      let importedCount = 0;
-      
-      // Process webhooks sequentially to maintain popup stability
-      for (let i = 0; i < imported.length; i++) {
-        const w = imported[i];
-        const exists = webhooks.some(existing => existing.name === w.name && existing.url === w.url);
+      try {
+        // Datei einlesen
+        const text = await readFileAsText(file);
         
-        if (!exists) {
-          console.log(`Adding webhook (${i+1}/${imported.length}):`, w.name);
-          try {
-            await webhookService.add(w);
-            importedCount++;
-          } catch (error) {
-            console.error(`Error adding webhook ${w.name}:`, error);
-          }
-          
-          // Small delay between operations
-          if (i < imported.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 50));
-          }
-        } else {
-          console.log(`Webhook already exists (${i+1}/${imported.length}):`, w.name);
+        if (!text || text.trim() === '') {
+          toast({
+            title: "Import fehlgeschlagen",
+            description: "Die Datei enthält keine Daten.",
+            variant: "destructive"
+          });
+          return;
         }
+        
+        // Parsen der CSV-Daten
+        const imported = csvToWebhooks(text);
+        
+        if (!imported || !imported.length) {
+          toast({
+            title: "Import fehlgeschlagen",
+            description: "Es wurden keine gültigen Webhook-Daten in der CSV gefunden.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        // Sofortige Erfolgs-Nachricht vor dem Import
+        toast({ 
+          title: "CSV gelesen", 
+          description: `${imported.length} Webhooks gefunden. Import wird verarbeitet...` 
+        });
+        
+        let importedCount = 0;
+        
+        // Webhooks sequentiell verarbeiten
+        for (let i = 0; i < imported.length; i++) {
+          const w = imported[i];
+          const exists = webhooks.some(existing => existing.name === w.name && existing.url === w.url);
+          
+          if (!exists) {
+            try {
+              await webhookService.add(w);
+              importedCount++;
+            } catch (error) {
+              console.error(`Fehler beim Hinzufügen von Webhook ${w.name}:`, error);
+            }
+          }
+        }
+        
+        // Abschließende Erfolgsmeldung
+        toast({ 
+          title: "Import erfolgreich", 
+          description: `${importedCount} Webhooks importiert.` 
+        });
+        
+        // Neuladen nach einer kurzen Verzögerung
+        setTimeout(reloadWebhooks, 300);
+      } catch (error) {
+        console.error("CSV Import-Fehler:", error);
+        toast({
+          title: "Import fehlgeschlagen",
+          description: typeof error === 'string' ? error : "Die CSV-Datei konnte nicht verarbeitet werden.",
+          variant: "destructive"
+        });
       }
-      
-      // Show success message
-      toast({ 
-        title: "Import erfolgreich", 
-        description: `${importedCount} Webhooks importiert.` 
-      });
-      
-      // Reload after a small delay
-      setTimeout(() => {
-        reloadWebhooks();
-      }, 300);
-    } catch (error) {
-      console.error("CSV Import error:", error);
-      toast({
-        title: "Import fehlgeschlagen",
-        description: typeof error === 'string' ? error : "Die CSV-Datei konnte nicht verarbeitet werden.",
-        variant: "destructive"
-      });
-    } finally {
-      // Reset the file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
+    };
+    
+    // Dialog zum Öffnen der Datei anzeigen
+    newInput.click();
   };
   
-  // Helper function to read file content as text
+  // Hilfsfunktion zum Lesen einer Datei als Text
   const readFileAsText = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -156,7 +165,6 @@ export const useWebhookCSV = (
         reject("Fehler beim Zugriff auf die Datei");
       };
       
-      // Read the file as text
       reader.readAsText(file);
     });
   };
@@ -165,6 +173,6 @@ export const useWebhookCSV = (
     handleExportCSV,
     handleImportCSV,
     fileInputRef,
-    triggerImportDialog: () => fileInputRef.current?.click(),
+    triggerImportDialog: handleImportCSV,  // Direkt handleImportCSV verwenden statt fileInputRef.current?.click()
   };
 };
