@@ -51,6 +51,10 @@ export const useWebhookCSV = (
     
     console.log("File selected:", file.name, file.type, file.size);
     
+    // Prevent default behavior that might close the popup
+    e.preventDefault();
+    e.stopPropagation();
+    
     // Create a new FileReader
     const reader = new FileReader();
     
@@ -73,22 +77,30 @@ export const useWebhookCSV = (
         }
         
         let importedCount = 0;
-        for (const w of imported) {
+        // Verwende Promise.all für parallele Verarbeitung, aber mit einem kleinen Delay
+        // um das UI nicht zu blockieren und das Popup offen zu halten
+        await Promise.all(imported.map(async (w, index) => {
           const exists = webhooks.some(existing => existing.name === w.name && existing.url === w.url);
           if (!exists) {
             console.log("Adding webhook:", w.name);
+            // Delay hinzufügen, um das UI nicht zu blockieren
+            await new Promise(resolve => setTimeout(resolve, index * 50));
             await webhookService.add(w);
             importedCount++;
           } else {
             console.log("Webhook already exists:", w.name);
           }
-        }
+        }));
         
         toast({ 
           title: "Import erfolgreich", 
           description: `${importedCount} Webhooks importiert.` 
         });
-        reloadWebhooks();
+        
+        // Verwende setTimeout, um sicherzustellen, dass das Popup nicht geschlossen wird
+        setTimeout(() => {
+          reloadWebhooks();
+        }, 100);
       } catch (err) {
         console.error("CSV Import error:", err);
         toast({
