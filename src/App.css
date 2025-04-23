@@ -44,19 +44,23 @@
 
 /* More elegant scrollbar fix that doesn't create excess space */
 html {
-  overflow-y: auto;
+  overflow-y: scroll;
   scrollbar-width: thin;
+  scrollbar-gutter: stable;
 }
 
 body, #root {
   overflow-x: hidden;
   scrollbar-gutter: stable;
+  overflow-y: scroll;
+  scrollbar-width: thin;
 }
 
 /* For components that need scrolling */
 .scrollbar-fix {
   scrollbar-gutter: stable;
-  overflow-y: auto;
+  overflow-y: scroll;
+  scrollbar-width: thin;
 }
 
 /* Dialog content specific fixes */
@@ -64,4 +68,6 @@ body, #root {
 [role="dialog"],
 [class*="DialogContent"] {
   scrollbar-gutter: stable;
+  overflow-y: scroll;
+  scrollbar-width: thin;
 }

@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { WebhookConfig, webhookService } from "@/services/webhookService";
 import { useToast } from "@/hooks/use-toast";
@@ -118,10 +119,11 @@ const WebhookManagerContainer = () => {
 
   return (
     <div 
-      className="min-h-[600px] w-[480px] bg-background"
+      className="min-h-[600px] w-[480px] bg-background scrollbar-fix"
       style={{ 
         scrollbarGutter: 'stable',
-        overflowY: 'auto'
+        scrollbarWidth: 'thin',
+        overflowY: 'scroll'
       }}
     >
       <WebhookHeader

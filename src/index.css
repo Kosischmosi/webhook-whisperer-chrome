@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -93,12 +94,15 @@
     @apply bg-background text-foreground;
   }
   
-  /* Subtle scrollbar presence that doesn't create extra space */
+  /* Ensure consistent scrollbar behavior */
   html {
-    overflow-y: auto;
+    overflow-y: scroll;
+    scrollbar-width: thin;
   }
   
   body, #root {
+    overflow-y: scroll;
+    scrollbar-width: thin;
     scrollbar-gutter: stable;
   }
 }
