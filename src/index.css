@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -94,15 +93,8 @@
     @apply bg-background text-foreground;
   }
   
-  /* Ensure consistent scrollbar behavior */
+  /* Prevent layout shifts with scrollbars */
   html {
-    overflow-y: scroll;
-    scrollbar-width: thin;
-  }
-  
-  body, #root {
-    overflow-y: scroll;
-    scrollbar-width: thin;
     scrollbar-gutter: stable;
   }
 }

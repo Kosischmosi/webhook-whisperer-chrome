@@ -14,16 +14,8 @@ interface WebhookDialogFormProps {
 const WebhookDialogForm = ({ isOpen, webhook, onSave, onClose }: WebhookDialogFormProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen => !setIsOpen && onClose()}>
-      <DialogContent className="sm:max-w-[380px] max-h-[470px] p-0 dialog-content" style={{
-        scrollbarGutter: 'stable',
-        scrollbarWidth: 'thin',
-        overflowY: 'scroll'
-      }}>
-        <ScrollArea className="h-[470px] scrollbar-fix" style={{
-          scrollbarGutter: 'stable',
-          scrollbarWidth: 'thin',
-          overflowY: 'scroll'
-        }}>
+      <DialogContent className="sm:max-w-[380px] max-h-[470px] p-0">
+        <ScrollArea className="h-[470px]">
           <div className="p-4">
             <WebhookForm
               webhook={webhook || undefined}

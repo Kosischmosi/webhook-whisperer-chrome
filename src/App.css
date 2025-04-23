@@ -42,32 +42,11 @@
   color: #888;
 }
 
-/* More elegant scrollbar fix that doesn't create excess space */
+/* Prevent layout shifts with scrollbars */
 html {
-  overflow-y: scroll;
-  scrollbar-width: thin;
   scrollbar-gutter: stable;
 }
 
-body, #root {
+body {
   overflow-x: hidden;
-  scrollbar-gutter: stable;
-  overflow-y: scroll;
-  scrollbar-width: thin;
-}
-
-/* For components that need scrolling */
-.scrollbar-fix {
-  scrollbar-gutter: stable;
-  overflow-y: scroll;
-  scrollbar-width: thin;
-}
-
-/* Dialog content specific fixes */
-.dialog-content,
-[role="dialog"],
-[class*="DialogContent"] {
-  scrollbar-gutter: stable;
-  overflow-y: scroll;
-  scrollbar-width: thin;
 }
