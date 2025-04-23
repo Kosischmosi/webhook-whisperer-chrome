@@ -15,7 +15,7 @@ const WebhookDialogForm = ({ isOpen, webhook, onSave, onClose }: WebhookDialogFo
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen => !setIsOpen && onClose()}>
       <DialogContent className="sm:max-w-[380px] max-h-[470px] p-0 dialog-content">
-        <ScrollArea className="h-[470px]">
+        <ScrollArea className="h-[470px]" style={{ scrollbarGutter: 'stable', overflowY: 'scroll' }}>
           <div className="p-4">
             <WebhookForm
               webhook={webhook || undefined}

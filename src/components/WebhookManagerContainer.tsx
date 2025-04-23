@@ -124,7 +124,8 @@ const WebhookManagerContainer = () => {
       className="min-h-[600px] w-[480px] bg-background scrollbar-fix"
       style={{ 
         scrollbarWidth: 'thin',
-        scrollbarGutter: 'stable both-edges'
+        scrollbarGutter: 'stable',
+        overflowY: 'scroll'
       }}
     >
       <WebhookHeader

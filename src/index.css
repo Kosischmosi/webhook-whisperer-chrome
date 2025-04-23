@@ -93,6 +93,13 @@
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Ensure consistent scrollbar presence */
+  html, body, #root, main {
+    overflow-y: scroll !important;
+    scrollbar-gutter: stable !important;
+    overflow-x: hidden;
+  }
 }
 
 .copy-success {
@@ -130,4 +137,3 @@
     animation: fade-out 0.3s ease-out;
   }
 }
-

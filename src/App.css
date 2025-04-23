@@ -42,25 +42,21 @@
   color: #888;
 }
 
-/* Global scrollbar fix - applied at the highest level possible */
-html, body {
+/* Global scrollbar fix applied to ALL outermost containers */
+html, body, #root, main {
   overflow-y: scroll !important;
   scrollbar-gutter: stable !important;
+  /* Prevent horizontal scrollbar */
+  overflow-x: hidden;
 }
 
-/* Ensure main container has stable layout with scrollbar */
-#root {
-  overflow-y: scroll;
-  scrollbar-gutter: stable;
-}
-
-/* Keep the existing scrollbar fix class for specific components */
+/* Additional specific fixes for components */
 .scrollbar-fix {
   overflow-y: scroll !important;
   scrollbar-gutter: stable !important;
 }
 
-/* Keep existing dialog content fixes */
+/* Dialog content specific fixes */
 .dialog-content,
 [role="dialog"],
 [class*="DialogContent"],

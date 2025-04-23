@@ -37,7 +37,7 @@ const ScrollBar = React.forwardRef<
         "h-2.5 flex-col border-t border-t-transparent p-[1px]",
       className
     )}
-    // Always show the scrollbar
+    // Always show the scrollbar - ensure it's never hidden
     forceMount
     {...props}
   >
