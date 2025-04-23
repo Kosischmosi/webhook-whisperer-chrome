@@ -4,9 +4,6 @@
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
-  /* Verhindert das Springen beim Ein-/Ausblenden des Scrollbalkens */
-  overflow-y: scroll;
-  scrollbar-gutter: stable;
 }
 
 .logo {
@@ -45,18 +42,29 @@
   color: #888;
 }
 
-/* Verbesserte Scrollbar-Fix-Klasse - wirkt globaler und verhindert Sprünge */
-.scrollbar-fix {
+/* Global scrollbar fix - applied at the highest level possible */
+html, body {
   overflow-y: scroll !important;
-  scrollbar-gutter: stable both-edges !important;
+  scrollbar-gutter: stable !important;
 }
 
-/* Globaler Fix für alle Dialog-Inhalte und Hauptcontainer */
-body, 
+/* Ensure main container has stable layout with scrollbar */
+#root {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
+/* Keep the existing scrollbar fix class for specific components */
+.scrollbar-fix {
+  overflow-y: scroll !important;
+  scrollbar-gutter: stable !important;
+}
+
+/* Keep existing dialog content fixes */
 .dialog-content,
 [role="dialog"],
 [class*="DialogContent"],
 .min-h-\\[600px\\] {
   overflow-y: scroll !important;
-  scrollbar-gutter: stable both-edges !important;
+  scrollbar-gutter: stable !important;
 }
