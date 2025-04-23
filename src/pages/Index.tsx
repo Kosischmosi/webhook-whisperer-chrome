@@ -1,8 +1,7 @@
-
 import { useState, useEffect, useRef } from "react";
 import { WebhookConfig, webhookService } from "@/services/webhookService";
 import { useToast } from "@/hooks/use-toast";
-import { Plus } from "lucide-react";
+import { Plus, Upload, Download } from "lucide-react";
 import WebhookHeader from "@/components/WebhookHeader";
 import WebhookActionBar from "@/components/WebhookActionBar";
 import SearchBar from "@/components/SearchBar";
@@ -103,7 +102,6 @@ const Index = () => {
     }
   };
 
-  // --- Export als CSV ---
   const handleExportCSV = () => {
     if (webhooks.length === 0) {
       toast({
@@ -134,7 +132,6 @@ const Index = () => {
     });
   };
 
-  // --- Import aus CSV ---
   const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -142,9 +139,7 @@ const Index = () => {
       const text = await file.text();
       const imported = csvToWebhooks(text);
       if (!imported.length) throw new Error("Keine Webhooks gefunden");
-      // Parallel speichern (nacheinander, damit bestehende IDs nicht überschrieben werden)
       for (const w of imported) {
-        // Möglichkeit: Duplikate verhindern (nach Name+URL)
         const exists = webhooks.some(existing => existing.name === w.name && existing.url === w.url);
         if (!exists)
           await webhookService.add(w);
@@ -158,7 +153,6 @@ const Index = () => {
         variant: "destructive"
       });
     } finally {
-      // Reset input value so user can import the same file twice
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
@@ -167,24 +161,18 @@ const Index = () => {
 
   return (
     <div className="min-h-[600px] w-[480px] bg-background">
-      <WebhookHeader />
-
+      <WebhookHeader
+        onExportCSV={handleExportCSV}
+        onImportCSVClick={() => fileInputRef.current?.click()}
+      />
       <main className="w-full px-3 py-2">
-        <div className="flex justify-end gap-3 mb-2">
-          <Button size="sm" variant="secondary" onClick={handleExportCSV}>
-            Export CSV
-          </Button>
-          <input
-            type="file"
-            accept=".csv"
-            ref={fileInputRef}
-            className="hidden"
-            onChange={handleImportCSV}
-          />
-          <Button size="sm" variant="secondary" onClick={() => fileInputRef.current?.click()}>
-            Import CSV
-          </Button>
-        </div>
+        <input
+          type="file"
+          accept=".csv"
+          ref={fileInputRef}
+          className="hidden"
+          onChange={handleImportCSV}
+        />
         <WebhookActionBar onAddNew={handleAddWebhook} />
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         <WebhookList 
