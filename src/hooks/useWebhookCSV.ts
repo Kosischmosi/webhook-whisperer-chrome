@@ -44,26 +44,49 @@ export const useWebhookCSV = (
   const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    try {
-      const text = await file.text();
-      const imported = csvToWebhooks(text);
-      if (!imported.length) throw new Error("Keine Webhooks gefunden");
-      for (const w of imported) {
-        const exists = webhooks.some(existing => existing.name === w.name && existing.url === w.url);
-        if (!exists)
-          await webhookService.add(w);
+    
+    // Create a new FileReader
+    const reader = new FileReader();
+    
+    reader.onload = async (event) => {
+      try {
+        const text = event.target?.result as string;
+        if (!text) throw new Error("Datei konnte nicht gelesen werden");
+        
+        const imported = csvToWebhooks(text);
+        if (!imported.length) throw new Error("Keine Webhooks gefunden");
+        
+        for (const w of imported) {
+          const exists = webhooks.some(existing => existing.name === w.name && existing.url === w.url);
+          if (!exists)
+            await webhookService.add(w);
+        }
+        
+        toast({ title: "Import erfolgreich", description: `${imported.length} Webhooks importiert.` });
+        reloadWebhooks();
+      } catch (err) {
+        console.error("CSV Import error:", err);
+        toast({
+          title: "Import fehlgeschlagen",
+          description: "Die Datei konnte nicht gelesen oder das Format war ungültig.",
+          variant: "destructive"
+        });
       }
-      toast({ title: "Import erfolgreich", description: `${imported.length} Webhooks importiert.` });
-      reloadWebhooks();
-    } catch (err) {
+    };
+    
+    reader.onerror = () => {
       toast({
         title: "Import fehlgeschlagen",
-        description: "Die Datei konnte nicht gelesen oder das Format war ungültig.",
+        description: "Die Datei konnte nicht gelesen werden.",
         variant: "destructive"
       });
-    } finally {
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
+    };
+    
+    // Read the file as text
+    reader.readAsText(file);
+    
+    // Reset the file input
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   return {
