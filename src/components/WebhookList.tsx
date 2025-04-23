@@ -1,10 +1,10 @@
-
 import { WebhookConfig } from "@/services/webhookService";
 import WebhookCard from "@/components/WebhookCard";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
 import { ParsedWebhook } from "@/hooks/useWebhookCSV";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface WebhookListProps {
   loading: boolean;
@@ -64,24 +64,26 @@ const WebhookList = ({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4">
-      {filteredWebhooks.map((webhook) => (
-        <WebhookCard
-          key={webhook.id}
-          webhook={webhook}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
-      ))}
-      {filteredWebhooks.length === 0 && searchQuery && (
-        <div className="col-span-full text-center py-10">
-          <p className="text-muted-foreground">No webhooks found matching "{searchQuery}"</p>
-          <Button variant="link" onClick={() => setSearchQuery("")}>
-            Clear search
-          </Button>
-        </div>
-      )}
-    </div>
+    <ScrollArea className="h-full scrollbar-fix">
+      <div className="grid grid-cols-1 gap-4">
+        {filteredWebhooks.map((webhook) => (
+          <WebhookCard
+            key={webhook.id}
+            webhook={webhook}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        ))}
+        {filteredWebhooks.length === 0 && searchQuery && (
+          <div className="col-span-full text-center py-10">
+            <p className="text-muted-foreground">No webhooks found matching "{searchQuery}"</p>
+            <Button variant="link" onClick={() => setSearchQuery("")}>
+              Clear search
+            </Button>
+          </div>
+        )}
+      </div>
+    </ScrollArea>
   );
 };
 

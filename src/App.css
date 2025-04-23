@@ -45,8 +45,18 @@
   color: #888;
 }
 
-/* Zusätzliche Scrollbar-Fix-Klasse */
+/* Verbesserte Scrollbar-Fix-Klasse - wirkt globaler und verhindert Sprünge */
 .scrollbar-fix {
-  overflow-y: scroll;
-  scrollbar-gutter: stable;
+  overflow-y: scroll !important;
+  scrollbar-gutter: stable both-edges !important;
+}
+
+/* Globaler Fix für alle Dialog-Inhalte und Hauptcontainer */
+body, 
+.dialog-content,
+[role="dialog"],
+[class*="DialogContent"],
+.min-h-\\[600px\\] {
+  overflow-y: scroll !important;
+  scrollbar-gutter: stable both-edges !important;
 }
