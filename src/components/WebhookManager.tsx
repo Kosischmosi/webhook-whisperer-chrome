@@ -10,6 +10,9 @@ import WebhookDialogForm from "@/components/WebhookDialogForm";
 import DeleteWebhookDialog from "@/components/DeleteWebhookDialog";
 import AddWebhookButton from "@/components/AddWebhookButton";
 import { useWebhookCSV } from "@/hooks/useWebhookCSV";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { FileInput } from "lucide-react";
 
 const WebhookManager = () => {
   const { toast } = useToast();
@@ -103,16 +106,24 @@ const WebhookManager = () => {
 
   const {
     handleExportCSV,
-    handleImportCSV,
+    handleFileSelect,
+    handleDrop,
+    handleDragOver,
+    handleDragEnter,
     fileInputRef,
-    triggerImportDialog
+    triggerFileDialog,
+    selectedFile,
+    parsedWebhooks,
+    startImport,
+    cancelImport,
+    isImporting
   } = useWebhookCSV(webhooks, loadWebhooks);
 
   return (
     <div className="min-h-[600px] w-[480px] bg-background">
       <WebhookHeader
         onExportCSV={handleExportCSV}
-        onImportCSVClick={triggerImportDialog}
+        onImportCSVClick={triggerFileDialog}
       />
       <main className="w-full px-3 py-2">
         <input
@@ -120,9 +131,54 @@ const WebhookManager = () => {
           accept=".csv"
           ref={fileInputRef}
           className="hidden"
-          onChange={handleImportCSV}
+          onChange={handleFileSelect}
           aria-label="CSV Import"
         />
+        
+        {/* CSV Import-Bereich anzeigen, wenn keine Datei ausgewählt ist */}
+        {!selectedFile && !parsedWebhooks && (
+          <div 
+            className="mt-4 mb-6 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors"
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragEnter={handleDragEnter}
+            onClick={triggerFileDialog}
+          >
+            <FileInput className="mx-auto mb-2 h-10 w-10 text-gray-400" />
+            <h3 className="text-lg font-medium text-gray-700 mb-1">CSV-Datei importieren</h3>
+            <p className="text-sm text-gray-500 mb-2">Drag & Drop oder klicken zum Auswählen</p>
+            <p className="text-xs text-gray-400">Unterstützt CSV-Dateien mit name, url und secret</p>
+          </div>
+        )}
+        
+        {/* Zweiter Schritt des Imports anzeigen, wenn eine Datei ausgewählt wurde */}
+        {selectedFile && parsedWebhooks && (
+          <div className="mt-4 mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h3 className="text-lg font-medium text-gray-700 mb-2">CSV-Datei bereit zum Import</h3>
+            <p className="text-sm text-gray-600 mb-1">Datei: {selectedFile.name}</p>
+            <p className="text-sm text-gray-600 mb-4">
+              {parsedWebhooks.length} Webhooks gefunden
+            </p>
+            <div className="flex space-x-3">
+              <Button 
+                onClick={startImport} 
+                disabled={isImporting || parsedWebhooks.length === 0}
+                className="flex-1"
+              >
+                {isImporting ? "Wird importiert..." : "Import starten"}
+              </Button>
+              <Button 
+                onClick={cancelImport} 
+                variant="outline" 
+                disabled={isImporting}
+                className="flex-1"
+              >
+                Abbrechen
+              </Button>
+            </div>
+          </div>
+        )}
+        
         <WebhookActionBar onAddNew={handleAddWebhook} />
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         <WebhookList 
