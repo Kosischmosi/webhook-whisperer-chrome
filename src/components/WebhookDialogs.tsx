@@ -1,4 +1,5 @@
 
+import { memo } from "react";
 import WebhookDialogForm from "@/components/WebhookDialogForm";
 import DeleteWebhookDialog from "@/components/DeleteWebhookDialog";
 import { WebhookConfig } from "@/services/webhookService";
@@ -13,7 +14,8 @@ interface WebhookDialogsProps {
   closeDeleteDialog: () => void;
 }
 
-const WebhookDialogs = ({
+// Optimiert: Mit memo für bessere Performance (reduziert unnötige Rerenders)
+const WebhookDialogs = memo(({
   isAddDialogOpen,
   editingWebhook,
   handleWebhookSaved,
@@ -35,6 +37,8 @@ const WebhookDialogs = ({
       onConfirm={confirmDelete}
     />
   </>
-);
+));
+
+WebhookDialogs.displayName = "WebhookDialogs";
 
 export default WebhookDialogs;

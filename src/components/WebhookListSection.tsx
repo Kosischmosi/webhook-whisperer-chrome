@@ -1,4 +1,5 @@
 
+import { memo } from "react";
 import WebhookActionBar from "@/components/WebhookActionBar";
 import SearchBar from "@/components/SearchBar";
 import WebhookList from "@/components/WebhookList";
@@ -25,7 +26,8 @@ interface WebhookListSectionProps {
   handleCancelImport: () => void;
 }
 
-const WebhookListSection = ({
+// Optimiert: Verwende memo für bessere Performance
+const WebhookListSection = memo(({
   loading,
   webhooks,
   filteredWebhooks,
@@ -56,14 +58,12 @@ const WebhookListSection = ({
         onEdit={onEdit}
         onDelete={onDelete}
         setSearchQuery={setSearchQuery}
-        // Drop wird nicht mehr direkt weitergegeben!
+        onDrop={handleDrop}
       />
       <AddWebhookButton onClick={onAddNew} />
       {showDropZone && (
         <DropzoneOverlay
-          onDrop={async e => {
-            await handleDrop(e);
-          }}
+          onDrop={handleDrop}
           onClose={() => setShowDropZone(false)}
           selectedFile={selectedFile}
           parsedWebhooks={parsedWebhooks}
@@ -74,6 +74,8 @@ const WebhookListSection = ({
       )}
     </div>
   );
-};
+});
+
+WebhookListSection.displayName = "WebhookListSection";
 
 export default WebhookListSection;

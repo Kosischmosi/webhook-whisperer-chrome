@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { WebhookConfig, webhookService } from "@/services/webhookService";
 import { useToast } from "@/hooks/use-toast";
 import WebhookHeader from "@/components/WebhookHeader";
@@ -10,7 +10,6 @@ import { useWebhookCSV } from "@/hooks/useWebhookCSV";
 const WebhookManagerContainer = () => {
   const { toast } = useToast();
   const [webhooks, setWebhooks] = useState<WebhookConfig[]>([]);
-  const [filteredWebhooks, setFilteredWebhooks] = useState<WebhookConfig[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingWebhook, setEditingWebhook] = useState<WebhookConfig | null>(null);
@@ -18,12 +17,23 @@ const WebhookManagerContainer = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropZone, setShowDropZone] = useState(false);
 
-  const loadWebhooks = async () => {
+  // Optimiert: Verwende useMemo für gefilterte Webhooks
+  const filteredWebhooks = useMemo(() => {
+    if (!searchQuery) return webhooks;
+    
+    const query = searchQuery.toLowerCase();
+    return webhooks.filter(webhook => 
+      webhook.name.toLowerCase().includes(query) ||
+      webhook.url.toLowerCase().includes(query)
+    );
+  }, [searchQuery, webhooks]);
+
+  // Optimiert: Mit useCallback für stabilere Referenzen
+  const loadWebhooks = useCallback(async () => {
     setLoading(true);
     try {
       const data = await webhookService.getAll();
       setWebhooks(data);
-      setFilteredWebhooks(data);
     } catch (error) {
       console.error("Error loading webhooks:", error);
       toast({
@@ -34,51 +44,40 @@ const WebhookManagerContainer = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     loadWebhooks();
+  }, [loadWebhooks]);
+
+  const handleAddWebhook = useCallback(() => {
+    setEditingWebhook(null);
+    setIsAddDialogOpen(true);
   }, []);
 
-  useEffect(() => {
-    if (searchQuery) {
-      const filtered = webhooks.filter(webhook => 
-        webhook.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        webhook.url.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredWebhooks(filtered);
-    } else {
-      setFilteredWebhooks(webhooks);
-    }
-  }, [searchQuery, webhooks]);
-
-  const handleAddWebhook = () => {
-    setEditingWebhook(null);
-    setIsAddDialogOpen(true);
-  };
-
-  const handleEditWebhook = (webhook: WebhookConfig) => {
+  const handleEditWebhook = useCallback((webhook: WebhookConfig) => {
     setEditingWebhook(webhook);
     setIsAddDialogOpen(true);
-  };
+  }, []);
 
-  const handleDialogClose = () => {
+  const handleDialogClose = useCallback(() => {
     setIsAddDialogOpen(false);
     setEditingWebhook(null);
-  };
+  }, []);
 
-  const handleWebhookSaved = () => {
+  const handleWebhookSaved = useCallback(() => {
     loadWebhooks();
     setIsAddDialogOpen(false);
     setEditingWebhook(null);
-  };
+  }, [loadWebhooks]);
 
-  const handleDeleteClick = (webhookId: string) => {
+  const handleDeleteClick = useCallback((webhookId: string) => {
     setDeleteWebhookId(webhookId);
-  };
+  }, []);
 
-  const confirmDelete = async () => {
+  const confirmDelete = useCallback(async () => {
     if (!deleteWebhookId) return;
+    
     try {
       await webhookService.delete(deleteWebhookId);
       toast({
@@ -96,7 +95,7 @@ const WebhookManagerContainer = () => {
     } finally {
       setDeleteWebhookId(null);
     }
-  };
+  }, [deleteWebhookId, loadWebhooks, toast]);
 
   const {
     handleExportCSV,
@@ -108,19 +107,18 @@ const WebhookManagerContainer = () => {
     isImporting
   } = useWebhookCSV(webhooks, loadWebhooks);
 
-  const handleShowDropZone = () => setShowDropZone(true);
+  const handleShowDropZone = useCallback(() => setShowDropZone(true), []);
 
-  const handleCancelImport = () => {
+  const handleCancelImport = useCallback(() => {
     cancelImport();
     setShowDropZone(false);
-  };
+  }, [cancelImport]);
 
-  const handleStartImport = async () => {
+  const handleStartImport = useCallback(async () => {
     await startImport();
     setShowDropZone(false);
-  };
+  }, [startImport]);
 
-  // Die Listensektion und die Dialoge werden gemounted:
   return (
     <div className="min-h-[600px] w-[480px] bg-background">
       <WebhookHeader

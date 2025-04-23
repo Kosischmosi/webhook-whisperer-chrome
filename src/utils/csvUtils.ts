@@ -1,30 +1,55 @@
 
+/**
+ * Sicheres Umwandeln von Webhook-Daten in CSV-Format
+ */
 export function webhooksToCSV(webhooks: { name: string; url: string; secret: string }[]): string {
-  const rows = [
-    ['name', 'url', 'secret'],
-    ...webhooks.map(w => [w.name, w.url, w.secret]),
-  ];
-  return rows.map(row => 
-    row.map(field => `"${(field || '').replace(/"/g, '""')}"`).join(',')
-  ).join('\n');
+  try {
+    if (!Array.isArray(webhooks) || webhooks.length === 0) {
+      return "name,url,secret\n"; // Mindestens Header zurückgeben
+    }
+    
+    // Header + Datenzeilen
+    const rows = [
+      ['name', 'url', 'secret'],
+      ...webhooks.map(w => [
+        (w.name || '').toString(),
+        (w.url || '').toString(),
+        (w.secret || '').toString()
+      ]),
+    ];
+    
+    // CSV mit doppelten Anführungszeichen escapen
+    return rows.map(row => 
+      row.map(field => `"${(field || '').replace(/"/g, '""')}"`).join(',')
+    ).join('\n');
+  } catch (error) {
+    console.error("Fehler beim Erstellen der CSV:", error);
+    throw new Error("Webhooks konnten nicht in CSV umgewandelt werden");
+  }
 }
 
+/**
+ * Robustes Parsen von CSV-Daten zu Webhook-Objekten
+ */
 export function csvToWebhooks(csvString: string): { name: string; url: string; secret: string }[] {
-  // Debug Output
-  console.log("CSV Input (first 100 chars):", csvString.slice(0, 100) + "...");
+  console.log("CSV parsing started");
+  
+  if (!csvString || typeof csvString !== 'string') {
+    console.error("Invalid CSV input:", csvString);
+    return [];
+  }
   
   try {
-    // Handle potential BOM character in CSV file
-    const cleanCsv = csvString.replace(/^\uFEFF/, '');
+    // BOM-Zeichen entfernen und Leerräume trimmen
+    const cleanCsv = csvString.replace(/^\uFEFF/, '').trim();
     
-    // Check for empty CSV
-    if (!cleanCsv || cleanCsv.trim() === '') {
-      console.error("CSV string is empty");
+    if (!cleanCsv) {
+      console.error("CSV string is empty after cleaning");
       return [];
     }
     
-    // Split into rows - handle both \r\n and \n line endings
-    const rows = cleanCsv.trim().split(/\r?\n/);
+    // Splitten nach Zeilen - unterstützt verschiedene Zeilenumbrüche
+    const rows = cleanCsv.split(/\r?\n/).filter(row => row.trim() !== '');
     console.log("Parsed rows count:", rows.length);
     
     if (!rows.length) {
@@ -32,60 +57,76 @@ export function csvToWebhooks(csvString: string): { name: string; url: string; s
       return [];
     }
     
-    // Skip header row if present
-    let dataRows = rows;
-    if (rows[0].toLowerCase().includes('name') && rows[0].toLowerCase().includes('url')) {
-      dataRows = rows.slice(1);
-      console.log("Skipping header row, data rows count:", dataRows.length);
+    // Header-Zeile erkennen und überspringen
+    let dataStartIndex = 0;
+    const firstRowLower = rows[0].toLowerCase();
+    if (firstRowLower.includes('name') && firstRowLower.includes('url')) {
+      dataStartIndex = 1;
+      console.log("Skipping header row");
     }
     
-    // Process each data row
-    const result = dataRows
-      .filter(row => row && row.trim() !== '') // Skip empty rows
-      .map((row, index) => {
-        console.log(`Processing row ${index + 1}:`, row.substring(0, 50) + (row.length > 50 ? "..." : ""));
-        
-        // Simplify CSV parsing logic - try most common formats
-        
-        // 1. Try simple comma split with quote handling
-        let parts: string[] = [];
-        
-        // Check if we have quotes - if so, use a more careful parsing approach
-        if (row.includes('"')) {
-          // Regex to match CSV fields that may contain quotes
-          const csvRegex = /"([^"]*(?:"[^"]*"[^"]*)*)"|([^,]*),/g;
-          parts = [];
-          let match;
-          let remainder = row + ','; // Add trailing comma to match last field
-          
-          while (match = csvRegex.exec(remainder)) {
-            parts.push((match[1] !== undefined ? match[1] : match[2]) || '');
-          }
-          
-          // Check if we got enough parts
-          if (parts.length < 3) {
-            console.log("Quote parsing didn't produce enough fields, falling back to simple split");
-            parts = row.split(',').map(p => p.replace(/^"|"$/g, ''));
-          }
-        } else {
-          // No quotes, simple split is fine
-          parts = row.split(',');
-        }
-        
-        // Make sure we have at least 3 parts
-        while (parts.length < 3) parts.push('');
-        
-        return {
-          name: parts[0]?.replace(/^"|"$/g, '').replace(/""/g, '"') || '',
-          url: parts[1]?.replace(/^"|"$/g, '').replace(/""/g, '"') || '',
-          secret: parts[2]?.replace(/^"|"$/g, '').replace(/""/g, '"') || ''
-        };
-      });
+    // Optimierter CSV-Parser mit besserer Fehlerbehandlung
+    const results = [];
+    for (let i = dataStartIndex; i < rows.length; i++) {
+      const row = rows[i].trim();
+      if (!row) continue;
+      
+      // Spalten parsen mit Berücksichtigung von Anführungszeichen
+      const values = parseCSVRow(row);
+      
+      // Sicherstellen, dass mindestens Name und URL vorhanden sind
+      if (values.length >= 2) {
+        results.push({
+          name: values[0] || '',
+          url: values[1] || '',
+          secret: values[2] || ''
+        });
+      } else {
+        console.warn(`Row ${i + 1} has insufficient columns:`, row);
+      }
+    }
     
-    console.log("Successfully parsed webhooks count:", result.length);
-    return result;
-  } catch (e) {
-    console.error("Error parsing CSV:", e);
+    console.log("Successfully parsed webhooks:", results.length);
+    return results;
+  } catch (error) {
+    console.error("Error parsing CSV:", error);
     return [];
   }
+}
+
+/**
+ * Parst eine einzelne CSV-Zeile mit Berücksichtigung von Anführungszeichen
+ */
+function parseCSVRow(row: string): string[] {
+  const result: string[] = [];
+  let inQuotes = false;
+  let currentValue = '';
+  
+  for (let i = 0; i < row.length; i++) {
+    const char = row[i];
+    const nextChar = i < row.length - 1 ? row[i + 1] : '';
+    
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        // Doppelte Anführungszeichen innerhalb von Anführungszeichen -> ein Anführungszeichen
+        currentValue += '"';
+        i++; // Überspringe das nächste Anführungszeichen
+      } else {
+        // Ein- oder Ausschalten des Quote-Modus
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      // Komma außerhalb von Anführungszeichen -> neuer Wert
+      result.push(currentValue);
+      currentValue = '';
+    } else {
+      // Normales Zeichen
+      currentValue += char;
+    }
+  }
+  
+  // Den letzten Wert hinzufügen
+  result.push(currentValue);
+  
+  return result;
 }
