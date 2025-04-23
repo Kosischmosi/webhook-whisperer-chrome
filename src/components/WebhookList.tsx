@@ -4,6 +4,7 @@ import WebhookCard from "@/components/WebhookCard";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import EmptyState from "@/components/EmptyState";
+import { ParsedWebhook } from "@/hooks/useWebhookCSV";
 
 interface WebhookListProps {
   loading: boolean;
@@ -14,8 +15,12 @@ interface WebhookListProps {
   onEdit: (webhook: WebhookConfig) => void;
   onDelete: (webhookId: string) => void;
   setSearchQuery: (query: string) => void;
-  // Neu: optionales Prop für Drop-Events
   onDrop?: (e: React.DragEvent<HTMLDivElement>) => Promise<void> | void;
+  selectedFile?: File | null;
+  parsedWebhooks?: ParsedWebhook[] | null;
+  isImporting?: boolean;
+  handleStartImport?: () => Promise<void>;
+  handleCancelImport?: () => void;
 }
 
 const WebhookList = ({ 
@@ -28,6 +33,11 @@ const WebhookList = ({
   onDelete,
   setSearchQuery,
   onDrop,
+  selectedFile,
+  parsedWebhooks,
+  isImporting,
+  handleStartImport,
+  handleCancelImport
 }: WebhookListProps) => {
   if (loading) {
     return (
@@ -39,8 +49,18 @@ const WebhookList = ({
   }
 
   if (webhooks.length === 0) {
-    // Dropzone direkt bei leerem Zustand!
-    return <EmptyState onAddNew={onAddNew} onDrop={onDrop} />;
+    // Pass all the import-related props to EmptyState
+    return (
+      <EmptyState 
+        onAddNew={onAddNew} 
+        onDrop={onDrop}
+        selectedFile={selectedFile}
+        parsedWebhooks={parsedWebhooks}
+        isImporting={isImporting}
+        handleStartImport={handleStartImport}
+        handleCancelImport={handleCancelImport}
+      />
+    );
   }
 
   return (

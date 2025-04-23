@@ -1,14 +1,28 @@
 
 import { useRef, useState } from "react";
-import { MessageSquare, Upload } from "lucide-react";
+import { MessageSquare, Upload, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ParsedWebhook } from "@/hooks/useWebhookCSV";
 
 interface EmptyStateProps {
   onAddNew: () => void;
   onDrop?: (e: React.DragEvent<HTMLDivElement>) => Promise<void> | void;
+  selectedFile?: File | null;
+  parsedWebhooks?: ParsedWebhook[] | null;
+  isImporting?: boolean;
+  handleStartImport?: () => Promise<void>;
+  handleCancelImport?: () => void;
 }
 
-const EmptyState = ({ onAddNew, onDrop }: EmptyStateProps) => {
+const EmptyState = ({ 
+  onAddNew, 
+  onDrop,
+  selectedFile,
+  parsedWebhooks,
+  isImporting,
+  handleStartImport,
+  handleCancelImport
+}: EmptyStateProps) => {
   const [dragActive, setDragActive] = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
 
@@ -43,11 +57,50 @@ const EmptyState = ({ onAddNew, onDrop }: EmptyStateProps) => {
         <Upload className={`h-8 w-8 ${dragActive ? "text-blue-500" : "text-primary"}`} />
       </div>
       <h3 className="text-lg font-medium mb-2">Drag & Drop your CSV here</h3>
-      <p className="text-sm text-muted-foreground text-center mb-2 max-w-[230px]">
-        You can also click below to add your first webhook manually.
-      </p>
-      <Button variant="secondary" onClick={onAddNew}>Add Webhook Manually</Button>
-      <p className="text-xs text-gray-400 mt-2">Supports CSV with <code>name,url,secret</code></p>
+      
+      {selectedFile ? (
+        <>
+          <div className="text-sm text-center mb-1">
+            Datei: <strong>{selectedFile.name}</strong> geladen
+          </div>
+          {parsedWebhooks && Array.isArray(parsedWebhooks) && (
+            <div className="text-xs text-muted-foreground mb-2">
+              {parsedWebhooks.length} Webhooks erkannt
+            </div>
+          )}
+          <div className="flex gap-3 mt-2">
+            <Button 
+              variant="secondary"
+              size="sm"
+              onClick={handleStartImport}
+              disabled={isImporting}
+              className="flex items-center gap-1"
+            >
+              <Check className="h-4 w-4" />
+              {isImporting ? "Importiert..." : "Importieren"}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCancelImport}
+              disabled={isImporting}
+              className="flex items-center gap-1"
+            >
+              <X className="h-4 w-4" />
+              Abbrechen
+            </Button>
+          </div>
+        </>
+      ) : (
+        <>
+          <p className="text-sm text-muted-foreground text-center mb-2 max-w-[230px]">
+            You can also click below to add your first webhook manually.
+          </p>
+          <Button variant="secondary" onClick={onAddNew}>Add Webhook Manually</Button>
+          <p className="text-xs text-gray-400 mt-2">Supports CSV with <code>name,url,secret</code></p>
+        </>
+      )}
+      
       <span
         className={`absolute pointer-events-none select-none opacity-0`}
         aria-hidden

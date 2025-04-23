@@ -59,6 +59,11 @@ const WebhookListSection = memo(({
         onDelete={onDelete}
         setSearchQuery={setSearchQuery}
         onDrop={handleDrop}
+        selectedFile={selectedFile}
+        parsedWebhooks={parsedWebhooks}
+        isImporting={isImporting}
+        handleStartImport={handleStartImport}
+        handleCancelImport={handleCancelImport}
       />
       <AddWebhookButton onClick={onAddNew} />
       {showDropZone && (
