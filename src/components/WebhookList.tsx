@@ -1,3 +1,4 @@
+
 import { WebhookConfig } from "@/services/webhookService";
 import WebhookCard from "@/components/WebhookCard";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,8 @@ interface WebhookListProps {
   onEdit: (webhook: WebhookConfig) => void;
   onDelete: (webhookId: string) => void;
   setSearchQuery: (query: string) => void;
+  // Neu: optionales Prop für Drop-Events
+  onDrop?: (e: React.DragEvent<HTMLDivElement>) => Promise<void> | void;
 }
 
 const WebhookList = ({ 
@@ -23,7 +26,8 @@ const WebhookList = ({
   onAddNew, 
   onEdit, 
   onDelete,
-  setSearchQuery 
+  setSearchQuery,
+  onDrop,
 }: WebhookListProps) => {
   if (loading) {
     return (
@@ -35,7 +39,8 @@ const WebhookList = ({
   }
 
   if (webhooks.length === 0) {
-    return <EmptyState onAddNew={onAddNew} />;
+    // Dropzone direkt bei leerem Zustand!
+    return <EmptyState onAddNew={onAddNew} onDrop={onDrop} />;
   }
 
   return (
