@@ -42,25 +42,26 @@
   color: #888;
 }
 
-/* Global scrollbar fix applied to ALL outermost containers */
-html, body, #root, main {
-  overflow-y: scroll !important;
-  scrollbar-gutter: stable !important;
-  /* Prevent horizontal scrollbar */
-  overflow-x: hidden;
+/* More elegant scrollbar fix that doesn't create excess space */
+html {
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
-/* Additional specific fixes for components */
+body, #root {
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+}
+
+/* For components that need scrolling */
 .scrollbar-fix {
-  overflow-y: scroll !important;
-  scrollbar-gutter: stable !important;
+  scrollbar-gutter: stable;
+  overflow-y: auto;
 }
 
 /* Dialog content specific fixes */
 .dialog-content,
 [role="dialog"],
-[class*="DialogContent"],
-.min-h-\\[600px\\] {
-  overflow-y: scroll !important;
-  scrollbar-gutter: stable !important;
+[class*="DialogContent"] {
+  scrollbar-gutter: stable;
 }

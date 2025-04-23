@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { WebhookConfig, webhookService } from "@/services/webhookService";
 import { useToast } from "@/hooks/use-toast";
@@ -17,7 +16,6 @@ const WebhookManagerContainer = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropZone, setShowDropZone] = useState(false);
 
-  // Optimiert: Verwende useMemo für gefilterte Webhooks
   const filteredWebhooks = useMemo(() => {
     if (!searchQuery) return webhooks;
     
@@ -28,7 +26,6 @@ const WebhookManagerContainer = () => {
     );
   }, [searchQuery, webhooks]);
 
-  // Optimiert: Mit useCallback für stabilere Referenzen
   const loadWebhooks = useCallback(async () => {
     setLoading(true);
     try {
@@ -121,11 +118,10 @@ const WebhookManagerContainer = () => {
 
   return (
     <div 
-      className="min-h-[600px] w-[480px] bg-background scrollbar-fix"
+      className="min-h-[600px] w-[480px] bg-background"
       style={{ 
-        scrollbarWidth: 'thin',
         scrollbarGutter: 'stable',
-        overflowY: 'scroll'
+        overflowY: 'auto'
       }}
     >
       <WebhookHeader

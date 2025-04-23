@@ -22,13 +22,11 @@ const App = () => {
         <Toaster />
         <Sonner />
         <RouterComponent>
-          <div className="scrollbar-fix" style={{ scrollbarGutter: 'stable', overflowY: 'scroll' }}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </div>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </RouterComponent>
       </TooltipProvider>
     </QueryClientProvider>

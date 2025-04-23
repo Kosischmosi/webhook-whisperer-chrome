@@ -1,4 +1,3 @@
-
 import { WebhookConfig } from "@/services/webhookService";
 import WebhookCard from "@/components/WebhookCard";
 import { Button } from "@/components/ui/button";
@@ -65,10 +64,7 @@ const WebhookList = ({
   }
 
   return (
-    <ScrollArea 
-      className="h-full scrollbar-fix" 
-      style={{ scrollbarGutter: 'stable', overflowY: 'scroll' }}
-    >
+    <ScrollArea className="h-full">
       <div className="grid grid-cols-1 gap-4">
         {filteredWebhooks.map((webhook) => (
           <WebhookCard
