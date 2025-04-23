@@ -11,7 +11,6 @@ import DeleteWebhookDialog from "@/components/DeleteWebhookDialog";
 import AddWebhookButton from "@/components/AddWebhookButton";
 import { useWebhookCSV } from "@/hooks/useWebhookCSV";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { FileInput } from "lucide-react";
 
 const WebhookManager = () => {
@@ -23,6 +22,8 @@ const WebhookManager = () => {
   const [editingWebhook, setEditingWebhook] = useState<WebhookConfig | null>(null);
   const [deleteWebhookId, setDeleteWebhookId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  // STATE für Anzeige des Drop-Feldes
+  const [showDropZone, setShowDropZone] = useState(false);
 
   const loadWebhooks = async () => {
     setLoading(true);
@@ -104,14 +105,11 @@ const WebhookManager = () => {
     }
   };
 
+  // --- Anpassung: useWebhookCSV wird simpler ---
+
   const {
     handleExportCSV,
-    handleFileSelect,
     handleDrop,
-    handleDragOver,
-    handleDragEnter,
-    fileInputRef,
-    triggerFileDialog,
     selectedFile,
     parsedWebhooks,
     startImport,
@@ -119,66 +117,91 @@ const WebhookManager = () => {
     isImporting
   } = useWebhookCSV(webhooks, loadWebhooks);
 
+  // Zeige DropZone nur wenn showDropZone true ist:
+  const handleShowDropZone = () => setShowDropZone(true);
+
+  // DropZone schließen, wenn Import abgebrochen oder abgeschlossen
+  const handleCancelImport = () => {
+    cancelImport();
+    setShowDropZone(false);
+  };
+
+  const handleStartImport = async () => {
+    await startImport();
+    setShowDropZone(false);
+  };
+
+  // Wenn Import abgeschlossen wird, schließe DropZone (auch beim "x")
+  const handleDropWithClose = async (e: React.DragEvent<HTMLDivElement>) => {
+    await handleDrop(e);
+    // Falls Datei erfolgreich geladen wurde, Dropzone bleiben; sonst zurück zur Auswahl
+    // stay open here (user muss Import manuell starten)
+  };
+
   return (
     <div className="min-h-[600px] w-[480px] bg-background">
       <WebhookHeader
         onExportCSV={handleExportCSV}
-        onImportCSVClick={triggerFileDialog}
+        // Upload-Icon: Zeige Drop-Feld per Klick!
+        onImportCSVClick={handleShowDropZone}
       />
       <main className="w-full px-3 py-2">
-        <input
-          type="file"
-          accept=".csv"
-          ref={fileInputRef}
-          className="hidden"
-          onChange={handleFileSelect}
-          aria-label="CSV Import"
-        />
-        
-        {/* CSV Import-Bereich anzeigen, wenn keine Datei ausgewählt ist */}
-        {!selectedFile && !parsedWebhooks && (
+        {/* DRAG & DROP IMPORTFELD - NUR falls getriggert */}
+        {showDropZone && (
           <div 
-            className="mt-4 mb-6 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors"
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragEnter={handleDragEnter}
-            onClick={triggerFileDialog}
+            className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center"
+            onClick={handleCancelImport}
           >
-            <FileInput className="mx-auto mb-2 h-10 w-10 text-gray-400" />
-            <h3 className="text-lg font-medium text-gray-700 mb-1">CSV-Datei importieren</h3>
-            <p className="text-sm text-gray-500 mb-2">Drag & Drop oder klicken zum Auswählen</p>
-            <p className="text-xs text-gray-400">Unterstützt CSV-Dateien mit name, url und secret</p>
-          </div>
-        )}
-        
-        {/* Zweiter Schritt des Imports anzeigen, wenn eine Datei ausgewählt wurde */}
-        {selectedFile && parsedWebhooks && (
-          <div className="mt-4 mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <h3 className="text-lg font-medium text-gray-700 mb-2">CSV-Datei bereit zum Import</h3>
-            <p className="text-sm text-gray-600 mb-1">Datei: {selectedFile.name}</p>
-            <p className="text-sm text-gray-600 mb-4">
-              {parsedWebhooks.length} Webhooks gefunden
-            </p>
-            <div className="flex space-x-3">
-              <Button 
-                onClick={startImport} 
-                disabled={isImporting || parsedWebhooks.length === 0}
-                className="flex-1"
+            <div
+              className="bg-white border-2 border-blue-400 rounded-lg p-6 shadow-xl flex flex-col items-center min-w-[340px] relative"
+              onDrop={handleDropWithClose}
+              onDragOver={e => { e.preventDefault(); }}
+              onDragEnter={e => { e.preventDefault(); }}
+              onClick={e => e.stopPropagation()}
+            >
+              <button
+                className="absolute top-2 right-2 text-gray-400 hover:text-red-500 text-lg"
+                onClick={handleCancelImport}
+                aria-label="Import abbrechen"
               >
-                {isImporting ? "Wird importiert..." : "Import starten"}
-              </Button>
-              <Button 
-                onClick={cancelImport} 
-                variant="outline" 
-                disabled={isImporting}
-                className="flex-1"
-              >
-                Abbrechen
-              </Button>
+                ×
+              </button>
+              <FileInput className="mb-2 h-10 w-10 text-blue-400" />
+              <h3 className="text-lg font-medium text-gray-700 mb-1">CSV-Datei hier ablegen</h3>
+              <p className="text-sm text-gray-500 mb-3">Ziehe deine Datei ins Feld</p>
+              {!selectedFile && !parsedWebhooks && (
+                <p className="text-xs text-gray-400 mb-2">Unterstützt CSV mit <code>name,url,secret</code></p>
+              )}
+              {/* Falls Datei geladen ist und geparst wurde */}
+              {selectedFile && parsedWebhooks && (
+                <div className="w-full mb-2 text-center">
+                  <p className="text-sm text-gray-600 mb-1">Datei: {selectedFile.name}</p>
+                  <p className="text-sm text-gray-600 mb-2">{parsedWebhooks.length} Webhooks gefunden</p>
+                  <div className="flex space-x-3">
+                    <Button
+                      onClick={handleStartImport}
+                      disabled={isImporting || parsedWebhooks.length === 0}
+                      className="flex-1"
+                    >
+                      {isImporting ? "Wird importiert..." : "Import starten"}
+                    </Button>
+                    <Button
+                      onClick={handleCancelImport}
+                      variant="outline"
+                      disabled={isImporting}
+                      className="flex-1"
+                    >
+                      Abbrechen
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
-        
+
+        {/* KEIN klassischer Dateiupload mehr! */}
+
         <WebhookActionBar onAddNew={handleAddWebhook} />
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
         <WebhookList 

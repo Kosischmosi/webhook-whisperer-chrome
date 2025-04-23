@@ -1,5 +1,5 @@
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { WebhookConfig, webhookService } from "@/services/webhookService";
 import { webhooksToCSV, csvToWebhooks } from "@/utils/csvUtils";
 import { useToast } from "@/hooks/use-toast";
@@ -9,12 +9,11 @@ export const useWebhookCSV = (
   reloadWebhooks: () => void
 ) => {
   const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [parsedWebhooks, setParsedWebhooks] = useState<{name: string; url: string; secret: string}[] | null>(null);
   const [isImporting, setIsImporting] = useState(false);
-  
-  // Export-Funktion - unverändert
+
+  // CSV-Exportfunktion bleibt gleich
   const handleExportCSV = () => {
     if (webhooks.length === 0) {
       toast({
@@ -45,43 +44,20 @@ export const useWebhookCSV = (
     });
   };
 
-  // Drag & Drop-Handler
+  // Nur noch Drag & Drop!
   const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!e.dataTransfer.files || e.dataTransfer.files.length === 0) {
       return;
     }
-    
+
     const file = e.dataTransfer.files[0];
     await processSelectedFile(file);
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
-  // Dateiauswahl-Handler
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) {
-      return;
-    }
-    
-    const file = e.target.files[0];
-    await processSelectedFile(file);
-    
-    // Input-Element zurücksetzen, damit die gleiche Datei erneut ausgewählt werden kann
-    e.target.value = '';
-  };
-
-  // Gemeinsame Funktion zum Verarbeiten der ausgewählten Datei
+  // Datei lesen/parsen (wie vorher)
   const processSelectedFile = async (file: File) => {
     try {
       setSelectedFile(file);
@@ -89,11 +65,11 @@ export const useWebhookCSV = (
         title: "Datei geladen",
         description: `"${file.name}" wurde geladen. Klicke auf "Import starten" um fortzufahren.`,
       });
-      
+
       // Datei einlesen und CSV parsen
       const text = await readFileAsText(file);
       const imported = csvToWebhooks(text);
-      
+
       if (!imported || imported.length === 0) {
         toast({
           title: "Fehler beim Parsen",
@@ -103,7 +79,7 @@ export const useWebhookCSV = (
         setParsedWebhooks(null);
         return;
       }
-      
+
       setParsedWebhooks(imported);
     } catch (error) {
       console.error("Fehler beim Verarbeiten der Datei:", error);
@@ -117,7 +93,7 @@ export const useWebhookCSV = (
     }
   };
 
-  // Import starten (zweiter Schritt)
+  // Import starten (wie gehabt)
   const startImport = async () => {
     if (!parsedWebhooks) {
       toast({
@@ -127,21 +103,20 @@ export const useWebhookCSV = (
       });
       return;
     }
-    
+
     setIsImporting(true);
-    
+
     try {
       toast({
         title: "Import gestartet",
         description: `${parsedWebhooks.length} Webhooks werden importiert...`,
       });
-      
+
       let importedCount = 0;
-      
-      // Webhooks sequentiell importieren
+
       for (const webhook of parsedWebhooks) {
         const exists = webhooks.some(existing => existing.name === webhook.name && existing.url === webhook.url);
-        
+
         if (!exists) {
           try {
             await webhookService.add(webhook);
@@ -149,18 +124,15 @@ export const useWebhookCSV = (
           } catch (error) {
             console.error(`Fehler beim Hinzufügen von Webhook ${webhook.name}:`, error);
           }
-          
-          // Kurze Pause zwischen den Anfragen, um UI-Blockierung zu vermeiden
           await new Promise(resolve => setTimeout(resolve, 10));
         }
       }
-      
+
       toast({
         title: "Import erfolgreich",
         description: `${importedCount} Webhooks wurden importiert.`,
       });
-      
-      // Zurücksetzen und neuladen
+
       setSelectedFile(null);
       setParsedWebhooks(null);
       setTimeout(reloadWebhooks, 300);
@@ -176,11 +148,11 @@ export const useWebhookCSV = (
     }
   };
 
-  // Hilfsfunktion zum Lesen einer Datei als Text
+  // Datei lesen als Text
   const readFileAsText = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      
+
       reader.onload = (event) => {
         try {
           const text = event.target?.result as string;
@@ -193,23 +165,16 @@ export const useWebhookCSV = (
           reject("Fehler beim Lesen der Datei");
         }
       };
-      
+
       reader.onerror = () => {
         reject("Fehler beim Zugriff auf die Datei");
       };
-      
+
       reader.readAsText(file);
     });
   };
 
-  // Import-Dialog trigger (für Legacy-Unterstützung)
-  const triggerFileDialog = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  // Zurücksetzen des Imports
+  // Import abbrechen
   const cancelImport = () => {
     setSelectedFile(null);
     setParsedWebhooks(null);
@@ -218,15 +183,10 @@ export const useWebhookCSV = (
   return {
     handleExportCSV,
     handleDrop,
-    handleDragOver,
-    handleDragEnter,
-    handleFileSelect,
-    triggerFileDialog,
-    startImport,
-    cancelImport,
-    fileInputRef,
     selectedFile,
     parsedWebhooks,
+    startImport,
+    cancelImport,
     isImporting,
   };
 };
