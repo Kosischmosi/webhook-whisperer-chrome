@@ -16,12 +16,14 @@ interface WebhookListProps {
   onEdit: (webhook: WebhookConfig) => void;
   onDelete: (webhookId: string) => void;
   setSearchQuery: (query: string) => void;
-  onDrop?: (e: React.DragEvent<HTMLDivElement>) => Promise<void> | void;
-  selectedFile?: File | null;
-  parsedWebhooks?: ParsedWebhook[] | null;
-  isImporting?: boolean;
-  handleStartImport?: () => Promise<void>;
-  handleCancelImport?: () => void;
+  importProps?: {
+    onDrop: (e: React.DragEvent<HTMLDivElement>) => Promise<void> | void;
+    selectedFile: File | null;
+    parsedWebhooks: ParsedWebhook[] | null;
+    isImporting: boolean;
+    handleStartImport: () => Promise<void>;
+    handleCancelImport: () => void;
+  };
   onProviderFocus?: (webhookId: string) => void;
 }
 
@@ -34,12 +36,7 @@ const WebhookList = ({
   onEdit, 
   onDelete,
   setSearchQuery,
-  onDrop,
-  selectedFile,
-  parsedWebhooks,
-  isImporting,
-  handleStartImport,
-  handleCancelImport,
+  importProps,
   onProviderFocus
 }: WebhookListProps) => {
   if (loading) {
@@ -52,16 +49,15 @@ const WebhookList = ({
   }
 
   if (webhooks.length === 0) {
-    // Pass all the import-related props to EmptyState
     return (
       <EmptyState 
         onAddNew={onAddNew} 
-        onDrop={onDrop}
-        selectedFile={selectedFile}
-        parsedWebhooks={parsedWebhooks}
-        isImporting={isImporting}
-        handleStartImport={handleStartImport}
-        handleCancelImport={handleCancelImport}
+        onDrop={importProps?.onDrop}
+        selectedFile={importProps?.selectedFile}
+        parsedWebhooks={importProps?.parsedWebhooks}
+        isImporting={importProps?.isImporting}
+        handleStartImport={importProps?.handleStartImport}
+        handleCancelImport={importProps?.handleCancelImport}
       />
     );
   }
@@ -92,4 +88,3 @@ const WebhookList = ({
 };
 
 export default WebhookList;
-

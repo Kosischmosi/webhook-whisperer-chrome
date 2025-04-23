@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { WebhookConfig, webhookService } from "@/services/webhookService";
 import { useToast } from "@/hooks/use-toast";
@@ -25,23 +26,6 @@ const WebhookManagerContainer = () => {
       webhook.url.toLowerCase().includes(query)
     );
   }, [searchQuery, webhooks]);
-
-  const listSectionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleWindowFocus = () => {
-      if (lastFocusedWebhookId && filteredWebhooks.length > 0) {
-        setTimeout(() => {
-          const card = document.querySelector(`[data-webhook-id="${lastFocusedWebhookId}"] button[tabindex="0"]`);
-          if (card instanceof HTMLElement) {
-            card.focus();
-          }
-        }, 30);
-      }
-    };
-    window.addEventListener('focus', handleWindowFocus);
-    return () => window.removeEventListener('focus', handleWindowFocus);
-  }, [lastFocusedWebhookId, filteredWebhooks]);
 
   const loadWebhooks = useCallback(async () => {
     setLoading(true);
@@ -137,7 +121,7 @@ const WebhookManagerContainer = () => {
   }, []);
 
   return (
-    <div className="min-h-[600px] w-[480px] bg-background" ref={listSectionRef}>
+    <div className="min-h-[600px] w-[480px] bg-background">
       <WebhookHeader
         onExportCSV={handleExportCSV}
         onImportCSVClick={handleShowDropZone}

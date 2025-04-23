@@ -6,6 +6,7 @@ import WebhookList from "@/components/WebhookList";
 import AddWebhookButton from "@/components/AddWebhookButton";
 import { WebhookConfig } from "@/services/webhookService";
 import DropzoneOverlay from "@/components/DropzoneOverlay";
+import { ParsedWebhook } from "@/hooks/useWebhookCSV";
 
 interface WebhookListSectionProps {
   loading: boolean;
@@ -20,14 +21,13 @@ interface WebhookListSectionProps {
   setShowDropZone: (show: boolean) => void;
   handleDrop: (e: React.DragEvent<HTMLDivElement>) => Promise<void> | void;
   selectedFile: File | null;
-  parsedWebhooks: any;
+  parsedWebhooks: ParsedWebhook[] | null;
   isImporting: boolean;
   handleStartImport: () => Promise<void>;
   handleCancelImport: () => void;
   onProviderFocus?: (webhookId: string) => void;
 }
 
-// Optimiert: Verwende memo für bessere Performance
 const WebhookListSection = memo(({
   loading,
   webhooks,
@@ -47,6 +47,15 @@ const WebhookListSection = memo(({
   handleCancelImport,
   onProviderFocus,
 }: WebhookListSectionProps) => {
+  const importProps = {
+    onDrop: handleDrop,
+    selectedFile,
+    parsedWebhooks,
+    isImporting,
+    handleStartImport,
+    handleCancelImport
+  };
+
   return (
     <div className="relative">
       <WebhookActionBar onAddNew={onAddNew} />
@@ -60,13 +69,8 @@ const WebhookListSection = memo(({
         onEdit={onEdit}
         onDelete={onDelete}
         setSearchQuery={setSearchQuery}
-        onDrop={handleDrop}
-        selectedFile={selectedFile}
-        parsedWebhooks={parsedWebhooks}
-        isImporting={isImporting}
-        handleStartImport={handleStartImport}
-        handleCancelImport={handleCancelImport}
-        onProviderFocus={onProviderFocus} // NEW PROP
+        importProps={importProps}
+        onProviderFocus={onProviderFocus}
       />
       <AddWebhookButton onClick={onAddNew} />
       {showDropZone && (
@@ -87,4 +91,3 @@ const WebhookListSection = memo(({
 WebhookListSection.displayName = "WebhookListSection";
 
 export default WebhookListSection;
-
