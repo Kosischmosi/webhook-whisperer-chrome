@@ -121,6 +121,7 @@ const WebhookManager = () => {
           ref={fileInputRef}
           className="hidden"
           onChange={handleImportCSV}
+          aria-label="CSV Import"
         />
         <WebhookActionBar onAddNew={handleAddWebhook} />
         <SearchBar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
