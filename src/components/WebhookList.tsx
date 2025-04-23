@@ -1,3 +1,4 @@
+
 import { WebhookConfig } from "@/services/webhookService";
 import WebhookCard from "@/components/WebhookCard";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ interface WebhookListProps {
   isImporting?: boolean;
   handleStartImport?: () => Promise<void>;
   handleCancelImport?: () => void;
+  onProviderFocus?: (webhookId: string) => void;
 }
 
 const WebhookList = ({ 
@@ -37,7 +39,8 @@ const WebhookList = ({
   parsedWebhooks,
   isImporting,
   handleStartImport,
-  handleCancelImport
+  handleCancelImport,
+  onProviderFocus
 }: WebhookListProps) => {
   if (loading) {
     return (
@@ -72,6 +75,7 @@ const WebhookList = ({
             webhook={webhook}
             onEdit={onEdit}
             onDelete={onDelete}
+            onFocus={onProviderFocus}
           />
         ))}
         {filteredWebhooks.length === 0 && searchQuery && (
@@ -88,3 +92,4 @@ const WebhookList = ({
 };
 
 export default WebhookList;
+

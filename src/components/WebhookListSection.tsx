@@ -24,6 +24,7 @@ interface WebhookListSectionProps {
   isImporting: boolean;
   handleStartImport: () => Promise<void>;
   handleCancelImport: () => void;
+  onProviderFocus?: (webhookId: string) => void;
 }
 
 // Optimiert: Verwende memo für bessere Performance
@@ -44,6 +45,7 @@ const WebhookListSection = memo(({
   isImporting,
   handleStartImport,
   handleCancelImport,
+  onProviderFocus,
 }: WebhookListSectionProps) => {
   return (
     <div className="relative">
@@ -64,6 +66,7 @@ const WebhookListSection = memo(({
         isImporting={isImporting}
         handleStartImport={handleStartImport}
         handleCancelImport={handleCancelImport}
+        onProviderFocus={onProviderFocus} // NEW PROP
       />
       <AddWebhookButton onClick={onAddNew} />
       {showDropZone && (
@@ -84,3 +87,4 @@ const WebhookListSection = memo(({
 WebhookListSection.displayName = "WebhookListSection";
 
 export default WebhookListSection;
+

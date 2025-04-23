@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { WebhookConfig, webhookService } from "@/services/webhookService";
 import { useToast } from "@/hooks/use-toast";
 import WebhookHeader from "@/components/WebhookHeader";
@@ -15,16 +15,33 @@ const WebhookManagerContainer = () => {
   const [deleteWebhookId, setDeleteWebhookId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showDropZone, setShowDropZone] = useState(false);
+  const [lastFocusedWebhookId, setLastFocusedWebhookId] = useState<string | null>(null);
 
   const filteredWebhooks = useMemo(() => {
-    if (!searchQuery) return webhooks;
-    
+    if (!searchQuery) return webhooks;    
     const query = searchQuery.toLowerCase();
     return webhooks.filter(webhook => 
       webhook.name.toLowerCase().includes(query) ||
       webhook.url.toLowerCase().includes(query)
     );
   }, [searchQuery, webhooks]);
+
+  const listSectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleWindowFocus = () => {
+      if (lastFocusedWebhookId && filteredWebhooks.length > 0) {
+        setTimeout(() => {
+          const card = document.querySelector(`[data-webhook-id="${lastFocusedWebhookId}"] button[tabindex="0"]`);
+          if (card instanceof HTMLElement) {
+            card.focus();
+          }
+        }, 30);
+      }
+    };
+    window.addEventListener('focus', handleWindowFocus);
+    return () => window.removeEventListener('focus', handleWindowFocus);
+  }, [lastFocusedWebhookId, filteredWebhooks]);
 
   const loadWebhooks = useCallback(async () => {
     setLoading(true);
@@ -74,7 +91,6 @@ const WebhookManagerContainer = () => {
 
   const confirmDelete = useCallback(async () => {
     if (!deleteWebhookId) return;
-    
     try {
       await webhookService.delete(deleteWebhookId);
       toast({
@@ -116,8 +132,12 @@ const WebhookManagerContainer = () => {
     setShowDropZone(false);
   }, [startImport]);
 
+  const handleProviderFocus = useCallback((webhookId: string) => {
+    setLastFocusedWebhookId(webhookId);
+  }, []);
+
   return (
-    <div className="min-h-[600px] w-[480px] bg-background">
+    <div className="min-h-[600px] w-[480px] bg-background" ref={listSectionRef}>
       <WebhookHeader
         onExportCSV={handleExportCSV}
         onImportCSVClick={handleShowDropZone}
@@ -140,6 +160,7 @@ const WebhookManagerContainer = () => {
           isImporting={isImporting}
           handleStartImport={handleStartImport}
           handleCancelImport={handleCancelImport}
+          onProviderFocus={handleProviderFocus}
         />
         <WebhookDialogs
           isAddDialogOpen={isAddDialogOpen}

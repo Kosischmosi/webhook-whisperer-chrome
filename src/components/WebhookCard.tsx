@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { WebhookConfig } from "@/services/webhookService";
@@ -11,9 +11,11 @@ interface WebhookCardProps {
   webhook: WebhookConfig;
   onEdit: (webhook: WebhookConfig) => void;
   onDelete: (webhookId: string) => void;
+  onFocus?: (webhookId: string) => void;
 }
 
-const WebhookCard = ({ webhook, onEdit, onDelete }: WebhookCardProps) => {
+// Add tabIndex and data attribute for focus restoration
+const WebhookCard = ({ webhook, onEdit, onDelete, onFocus }: WebhookCardProps) => {
   const { toast } = useToast();
   const [showSecret, setShowSecret] = useState(false);
   const [copied, setCopied] = useState<{ url: boolean; secret: boolean }>({
@@ -21,15 +23,17 @@ const WebhookCard = ({ webhook, onEdit, onDelete }: WebhookCardProps) => {
     secret: false,
   });
 
+  const cardRef = useRef<HTMLDivElement>(null);
+
   const handleCopy = (text: string, field: "url" | "secret") => {
     navigator.clipboard.writeText(text);
     setCopied({ ...copied, [field]: true });
-    
+
     toast({
       title: "Copied",
       description: `${field.charAt(0).toUpperCase() + field.slice(1)} copied to clipboard`,
     });
-    
+
     setTimeout(() => {
       setCopied({ ...copied, [field]: false });
     }, 2000);
@@ -44,8 +48,19 @@ const WebhookCard = ({ webhook, onEdit, onDelete }: WebhookCardProps) => {
     }).format(date);
   };
 
+  // When user focuses this card (e.g. by click/tab), notify parent
+  const handleCardFocus = () => {
+    if (onFocus) onFocus(webhook.id);
+  };
+
+  // Keyboard accessibility: set tabIndex, only primary card-actions are tab stops
   return (
-    <Card className="w-full">
+    <Card
+      ref={cardRef}
+      className="w-full"
+      data-webhook-id={webhook.id}
+      tabIndex={-1} // Card itself not focusable
+    >
       <CardHeader className="pb-3">
         <div className="flex justify-between items-start">
           <div>
@@ -69,6 +84,8 @@ const WebhookCard = ({ webhook, onEdit, onDelete }: WebhookCardProps) => {
                 variant="ghost"
                 className="h-8 w-8"
                 onClick={() => handleCopy(webhook.url, "url")}
+                tabIndex={0}
+                onFocus={handleCardFocus}
               >
                 {copied.url ? <CheckCircle size={16} className="text-green-500" /> : <Copy size={16} />}
               </Button>
@@ -87,6 +104,7 @@ const WebhookCard = ({ webhook, onEdit, onDelete }: WebhookCardProps) => {
                   variant="ghost"
                   className="h-8 w-8"
                   onClick={() => setShowSecret(!showSecret)}
+                  tabIndex={-1} // only the copy button is tab focusable
                 >
                   {showSecret ? <EyeOff size={16} /> : <Eye size={16} />}
                 </Button>
@@ -95,6 +113,8 @@ const WebhookCard = ({ webhook, onEdit, onDelete }: WebhookCardProps) => {
                   variant="ghost"
                   className="h-8 w-8"
                   onClick={() => handleCopy(webhook.secret, "secret")}
+                  tabIndex={0}
+                  onFocus={handleCardFocus}
                 >
                   {copied.secret ? <CheckCircle size={16} className="text-green-500" /> : <Copy size={16} />}
                 </Button>
@@ -105,10 +125,22 @@ const WebhookCard = ({ webhook, onEdit, onDelete }: WebhookCardProps) => {
       </CardContent>
       <CardFooter className="pt-2">
         <div className="flex justify-end space-x-2 w-full">
-          <Button size="sm" variant="outline" onClick={() => onEdit(webhook)}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => { onEdit(webhook); if (onFocus) onFocus(webhook.id); }}
+            tabIndex={0}
+            onFocus={handleCardFocus}
+          >
             <Edit size={16} className="mr-2" /> Edit
           </Button>
-          <Button size="sm" variant="destructive" onClick={() => onDelete(webhook.id)}>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={() => { onDelete(webhook.id); if (onFocus) onFocus(webhook.id); }}
+            tabIndex={0}
+            onFocus={handleCardFocus}
+          >
             <Trash size={16} className="mr-2" /> Delete
           </Button>
         </div>
@@ -118,3 +150,4 @@ const WebhookCard = ({ webhook, onEdit, onDelete }: WebhookCardProps) => {
 };
 
 export default WebhookCard;
+
