@@ -148,9 +148,6 @@ const WebhookForm = ({ webhook, onSave, onCancel }: WebhookFormProps) => {
           <div className="space-y-1">
             <Label htmlFor="secret" className="text-sm leading-tight">
               Secret Key (optional)
-              <span className="text-xs text-muted-foreground ml-1">
-                - min. 10 chars, include numbers & special chars
-              </span>
             </Label>
             <div className="relative">
               <Input
