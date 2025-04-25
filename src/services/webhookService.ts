@@ -1,4 +1,4 @@
-import { isValidWebhookUrl, isStrongSecret } from "@/utils/securityUtils";
+import { isValidWebhookUrl } from "@/utils/securityUtils";
 
 export interface WebhookConfig {
   id: string;
@@ -53,6 +53,10 @@ export const webhookService = {
         throw new Error('Invalid webhook URL');
       }
       
+      if (!webhook.secret?.trim()) {
+        throw new Error('Secret key is required');
+      }
+      
       const webhooks = await webhookService.getAll();
       
       const newWebhook: WebhookConfig = {
@@ -77,6 +81,10 @@ export const webhookService = {
     try {
       if (updateData.url && !isValidWebhookUrl(updateData.url)) {
         throw new Error('Invalid webhook URL');
+      }
+      
+      if (!updateData.secret?.trim()) {
+        throw new Error('Secret key is required');
       }
       
       const webhooks = await webhookService.getAll();

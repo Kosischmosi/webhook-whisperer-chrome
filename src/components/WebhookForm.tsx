@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { WebhookConfig, webhookService } from "@/services/webhookService";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff, AlertCircle } from "lucide-react";
-import { isValidWebhookUrl, isStrongSecret } from "@/utils/securityUtils";
+import { isValidWebhookUrl } from "@/utils/securityUtils";
 
 interface WebhookFormProps {
   webhook?: WebhookConfig;
@@ -19,6 +19,7 @@ const WebhookForm = ({ webhook, onSave, onCancel }: WebhookFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showSecret, setShowSecret] = useState(false);
   const [errors, setErrors] = useState<{
+    name?: string;
     url?: string;
     secret?: string;
   }>({});
@@ -42,15 +43,15 @@ const WebhookForm = ({ webhook, onSave, onCancel }: WebhookFormProps) => {
     const newErrors: typeof errors = {};
     
     if (!formData.name.trim()) {
-      newErrors.url = "Name is required";
+      newErrors.name = "Name is required";
     }
     
     if (!isValidWebhookUrl(formData.url)) {
       newErrors.url = "Please enter a valid HTTP/HTTPS URL";
     }
     
-    if (formData.secret && !isStrongSecret(formData.secret)) {
-      newErrors.secret = "Secret must be at least 10 characters and include numbers and special characters";
+    if (!formData.secret.trim()) {
+      newErrors.secret = "Secret key is required";
     }
     
     setErrors(newErrors);
@@ -147,7 +148,7 @@ const WebhookForm = ({ webhook, onSave, onCancel }: WebhookFormProps) => {
           
           <div className="space-y-1">
             <Label htmlFor="secret" className="text-sm leading-tight">
-              Secret Key (optional)
+              Secret Key
             </Label>
             <div className="relative">
               <Input
@@ -158,6 +159,7 @@ const WebhookForm = ({ webhook, onSave, onCancel }: WebhookFormProps) => {
                 value={formData.secret}
                 onChange={handleChange}
                 className={`h-8 text-sm pr-9 px-2 ${errors.secret ? 'border-red-500' : ''}`}
+                required
               />
               <Button
                 type="button"
