@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { WebhookConfig, webhookService } from "@/services/webhookService";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff, AlertCircle } from "lucide-react";
-import { isValidWebhookUrl, isStrongSecret } from "@/utils/securityUtils";
+import { isValidWebhookUrl } from "@/utils/securityUtils";
 
 interface WebhookFormProps {
   webhook?: WebhookConfig;
@@ -52,8 +52,6 @@ const WebhookForm = ({ webhook, onSave, onCancel }: WebhookFormProps) => {
     
     if (!formData.secret.trim()) {
       newErrors.secret = "Secret key is required";
-    } else if (!isStrongSecret(formData.secret)) {
-      newErrors.secret = "Secret must be at least 10 characters and include numbers and special characters";
     }
     
     setErrors(newErrors);
@@ -157,7 +155,7 @@ const WebhookForm = ({ webhook, onSave, onCancel }: WebhookFormProps) => {
                 id="secret"
                 name="secret"
                 type={showSecret ? "text" : "password"}
-                placeholder="Your webhook secret (min 10 chars, include numbers & special chars)"
+                placeholder="Enter your webhook secret"
                 value={formData.secret}
                 onChange={handleChange}
                 className={`h-8 text-sm pr-9 px-2 ${errors.secret ? 'border-red-500' : ''}`}
