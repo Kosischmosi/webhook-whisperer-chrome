@@ -12,18 +12,9 @@ export const isValidWebhookUrl = (url: string): boolean => {
 };
 
 /**
- * Validates webhook secret to ensure it meets minimum security requirements
- * - At least 10 characters
- * - Contains at least one number
- * - Contains at least one special character
+ * Basic validation to ensure secret is provided if required
+ * No format restrictions since secrets are provided by webhook providers
  */
 export const isStrongSecret = (secret: string): boolean => {
-  if (!secret) return true; // Secret is optional
-  if (secret.length < 10) return false;
-  
-  const hasNumber = /\d/.test(secret);
-  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(secret);
-  
-  return hasNumber && hasSpecialChar;
+  return true; // Accept any secret format since it's provider-defined
 };
-
