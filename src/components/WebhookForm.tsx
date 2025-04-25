@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +5,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "@/components/ui/label";
 import { WebhookConfig, webhookService } from "@/services/webhookService";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { isValidWebhookUrl, isStrongSecret } from "@/utils/securityUtils";
 
 interface WebhookFormProps {
   webhook?: WebhookConfig;
@@ -18,6 +18,10 @@ const WebhookForm = ({ webhook, onSave, onCancel }: WebhookFormProps) => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [showSecret, setShowSecret] = useState(false);
+  const [errors, setErrors] = useState<{
+    url?: string;
+    secret?: string;
+  }>({});
 
   const [formData, setFormData] = useState({
     name: webhook?.name || "",
@@ -28,31 +32,53 @@ const WebhookForm = ({ webhook, onSave, onCancel }: WebhookFormProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    if (errors[name as keyof typeof errors]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: typeof errors = {};
+    
+    if (!formData.name.trim()) {
+      newErrors.url = "Name is required";
+    }
+    
+    if (!isValidWebhookUrl(formData.url)) {
+      newErrors.url = "Please enter a valid HTTP/HTTPS URL";
+    }
+    
+    if (formData.secret && !isStrongSecret(formData.secret)) {
+      newErrors.secret = "Secret must be at least 10 characters and include numbers and special characters";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      toast({
+        title: "Validation Error",
+        description: "Please check the form for errors",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      if (!formData.name || !formData.url) {
-        toast({
-          title: "Error",
-          description: "Name and URL are required fields",
-          variant: "destructive",
-        });
-        return;
-      }
-
       if (webhook) {
-        // Update existing webhook
         await webhookService.update(webhook.id, formData);
         toast({
           title: "Success",
           description: "Webhook updated successfully",
         });
       } else {
-        // Create new webhook
         await webhookService.add(formData);
         toast({
           title: "Success",
@@ -109,12 +135,23 @@ const WebhookForm = ({ webhook, onSave, onCancel }: WebhookFormProps) => {
               value={formData.url}
               onChange={handleChange}
               required
-              className="h-8 text-sm px-2"
+              className={`h-8 text-sm px-2 ${errors.url ? 'border-red-500' : ''}`}
             />
+            {errors.url && (
+              <div className="text-xs text-red-500 flex items-center gap-1 mt-1">
+                <AlertCircle size={12} />
+                {errors.url}
+              </div>
+            )}
           </div>
           
           <div className="space-y-1">
-            <Label htmlFor="secret" className="text-sm leading-tight">Secret Key (optional)</Label>
+            <Label htmlFor="secret" className="text-sm leading-tight">
+              Secret Key (optional)
+              <span className="text-xs text-muted-foreground ml-1">
+                - min. 10 chars, include numbers & special chars
+              </span>
+            </Label>
             <div className="relative">
               <Input
                 id="secret"
@@ -123,7 +160,7 @@ const WebhookForm = ({ webhook, onSave, onCancel }: WebhookFormProps) => {
                 placeholder="Your webhook secret"
                 value={formData.secret}
                 onChange={handleChange}
-                className="h-8 text-sm pr-9 px-2"
+                className={`h-8 text-sm pr-9 px-2 ${errors.secret ? 'border-red-500' : ''}`}
               />
               <Button
                 type="button"
@@ -136,6 +173,12 @@ const WebhookForm = ({ webhook, onSave, onCancel }: WebhookFormProps) => {
                 {showSecret ? <EyeOff size={16} /> : <Eye size={16} />}
               </Button>
             </div>
+            {errors.secret && (
+              <div className="text-xs text-red-500 flex items-center gap-1 mt-1">
+                <AlertCircle size={12} />
+                {errors.secret}
+              </div>
+            )}
           </div>
         </CardContent>
         

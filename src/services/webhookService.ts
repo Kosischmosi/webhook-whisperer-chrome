@@ -1,4 +1,6 @@
 
+import { isValidWebhookUrl, isStrongSecret } from "@/utils/securityUtils";
+
 export interface WebhookConfig {
   id: string;
   name: string;
@@ -44,6 +46,18 @@ export const webhookService = {
 
   add: async (webhook: Omit<WebhookConfig, 'id' | 'createdAt' | 'updatedAt'>): Promise<WebhookConfig> => {
     try {
+      if (!webhook.name?.trim()) {
+        throw new Error('Name is required');
+      }
+      
+      if (!isValidWebhookUrl(webhook.url)) {
+        throw new Error('Invalid webhook URL');
+      }
+      
+      if (webhook.secret && !isStrongSecret(webhook.secret)) {
+        throw new Error('Invalid secret format');
+      }
+      
       const webhooks = await webhookService.getAll();
       
       const newWebhook: WebhookConfig = {
@@ -60,12 +74,20 @@ export const webhookService = {
       });
     } catch (error) {
       console.error('Error adding webhook:', error);
-      throw new Error('Failed to add webhook');
+      throw error;
     }
   },
 
   update: async (id: string, updateData: Partial<Omit<WebhookConfig, 'id' | 'createdAt'>>): Promise<WebhookConfig> => {
     try {
+      if (updateData.url && !isValidWebhookUrl(updateData.url)) {
+        throw new Error('Invalid webhook URL');
+      }
+      
+      if (updateData.secret && !isStrongSecret(updateData.secret)) {
+        throw new Error('Invalid secret format');
+      }
+      
       const webhooks = await webhookService.getAll();
       const index = webhooks.findIndex(hook => hook.id === id);
       
@@ -88,7 +110,7 @@ export const webhookService = {
       });
     } catch (error) {
       console.error('Error updating webhook:', error);
-      throw new Error('Failed to update webhook');
+      throw error;
     }
   },
 
